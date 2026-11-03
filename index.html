@@ -541,7 +541,9 @@ const treeGroup=new THREE.Group(); scene.add(treeGroup);
   const trG=new THREE.CylinderGeometry(.11,.2,1,7); trG.translate(0,.5,0);
   const tr=new THREE.InstancedMesh(trG,mat('#5b4a3a'),TREES.length); tr.castShadow=true;
   const m4=new THREE.Matrix4(), q=new THREE.Quaternion(), e=new THREE.Euler(), sc=new THREE.Vector3(), pos=new THREE.Vector3();
-  const oak=['#4f6534','#58703a','#475e30','#5f7640'], olive=['#7c8a5e','#87936a','#717f55'];
+  const oak=['#4f6534','#58703a','#475e30','#5f7640'], olive=['#8b9a76','#94a281','#7f8e6a'];
+  // olives (from Polina's dinner photo): silvery crowns on two or three pale, splayed stems
+  const stemG=new THREE.CylinderGeometry(.05,.085,1,6); stemG.translate(0,.5,0); const stems=new THREE.InstancedMesh(stemG,mat('#857c6a',{roughness:1}),TREES.length*3); stems.castShadow=true; let si=0;
   let ti=0;
   bins.forEach((list,vi)=>{const im=new THREE.InstancedMesh(variants[vi],cmat,list.length); im.castShadow=true; im.receiveShadow=true;
     list.forEach((t,i)=>{const ty=H(t[0],t[1]), r=Math.min(Math.max(t[2]*0.95,1.3),5.5), small=r<2.1, ch=r*(small?1.1:1.35); let trunk=small?1.1+r*.35:1.8+r*.45; if(overTable(t[0],t[1])) trunk=Math.max(trunk,2.3+ch*.24);
@@ -549,9 +551,12 @@ const treeGroup=new THREE.Group(); scene.add(treeGroup);
       e.set(lean,i*1.7,-lean); q.setFromEuler(e); sc.set(r*1.05,ch*.62,r*1.05); pos.set(t[0],ty+trunk+ch*.32,t[1]);
       m4.compose(pos,q,sc); im.setMatrixAt(i,m4);
       const pal=small?olive:oak; im.setColorAt(i,C(pal[(i*7+vi)%pal.length]));
-      e.set(lean*2,i,-lean*2); q.setFromEuler(e); sc.set(.6+r*.14,trunk+ch*.2,.6+r*.14); pos.set(t[0],ty-.2,t[1]); m4.compose(pos,q,sc); tr.setMatrixAt(ti++,m4)});
+      if(small){ const ns=2+((i+vi)%2), hgt=trunk+ch*.25; for(let k=0;k<ns;k++){const a=(k/ns)*Math.PI*2+i, tilt=.18+((i*13+k*7)%5)*.03;
+          e.set(Math.cos(a)*tilt,0,Math.sin(a)*tilt); q.setFromEuler(e); sc.set(1,hgt,1); pos.set(t[0],ty-.1,t[1]); m4.compose(pos,q,sc); stems.setMatrixAt(si++,m4)}
+        m4.makeScale(0,0,0); tr.setMatrixAt(ti++,m4) }
+      else { e.set(lean*2,i,-lean*2); q.setFromEuler(e); sc.set(.6+r*.14,trunk+ch*.2,.6+r*.14); pos.set(t[0],ty-.2,t[1]); m4.compose(pos,q,sc); tr.setMatrixAt(ti++,m4) }});
     treeGroup.add(im)});
-  treeGroup.add(tr);
+  stems.count=si; treeGroup.add(tr,stems);
   // soft dark pools under every canopy (ambient occlusion), so trees sit in the grass instead of floating on it
   const blobTex=canvasTex(128,(x,n)=>{const g=x.createRadialGradient(n/2,n/2,0,n/2,n/2,n/2); g.addColorStop(0,'rgba(0,0,0,.55)'); g.addColorStop(.55,'rgba(0,0,0,.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,n,n)},false);
   const bg=new THREE.PlaneGeometry(1,1); bg.rotateX(-Math.PI/2);
@@ -1002,19 +1007,20 @@ function applySun(withEnv){
 const CHIPS=[[930,'Guests arrive','arrival'],[960,'Ceremony','ceremony'],[1005,'Drinks','drinks'],[1170,'Dinner','dinner'],[1200,'Food served','dinner'],[0,'Sunset','overview']];
 CHIPS.forEach(c=>{const b=document.createElement('button'); const t=c[0]||SUNSET-10;
   b.innerHTML='<b>'+fmt(c[0]||SUNSET)+'</b>'+c[1]; b.onclick=()=>{S.time=t; applySun(); go(c[2]); save()}; $('#chips').appendChild(b)});
-const VIEWS={overview:'Overview',top:'From above',photo3:'Ceremony 3, as in your photo',photo1:'Ceremony 1, as in your photo',arrival:'Arriving guest',ceremony:'From the aisle',drinks:'Courtyard drinks',dinner:'At the table',party:'Tent'};
+const VIEWS={overview:'Overview',top:'From above',photo3:'Ceremony 3, as in your photo',photo1:'Ceremony 1, as in your photo',photoD:'Dinner, as in your photo',arrival:'Arriving guest',ceremony:'From the aisle',drinks:'Courtyard drinks',dinner:'At the table',party:'Tent'};
 Object.entries(VIEWS).forEach(([k,n])=>{const b=document.createElement('button'); b.textContent=n; b.onclick=()=>go(k); $('#views').appendChild(b)});
 [['Drinks',COL.cocktail],['Welcome',COL.welcome],['Ceremony',COL.cer],['Dinner',COL.dinner],['Party tent','#e8e1d3'],['Catering',COL.kitchen],['Parking',COL.parking],['Guest route','#3F5E78']]
  .forEach(([n,c])=>{const s=document.createElement('span'); s.innerHTML='<span class="dot" style="background:'+c+'"></span>'+n; $('#legend').appendChild(s)});
 
 function world(k,lx,lz,y){const g=zones[k].group; const v=new THREE.Vector3(lx,0,lz).applyMatrix4(g.matrixWorld); v.y=H(v.x,v.z)+y; return v}
 function go(k){
-  camera.fov=(k==='photo3'||k==='photo1')?64:42; camera.updateProjectionMatrix();
+  camera.fov=(k==='photo3'||k==='photo1'||k==='photoD')?64:42; camera.updateProjectionMatrix();
   scene.updateMatrixWorld(); let pos,tgt;
   const cz=zones[S.cer], dz=zones.dinner;
   if(k==='overview'){pos=new THREE.Vector3(32,72,98);tgt=new THREE.Vector3(-30,0,-14)}
   else if(k==='top'){pos=new THREE.Vector3(-20,230,1);tgt=new THREE.Vector3(-20,0,0)}
   else if(k==='arrival'){pos=world('parking',zones.parking.w/2-6,-1,1.7); tgt=center('welcome').clone().setY(H(center('welcome').x,center('welcome').z)+1.4)}
+  else if(k==='photoD'){const sp=v=>new THREE.Vector3(v[0],H(v[0],v[1])+v[2],v[1]); pos=sp([-58.2,36.2,1.6]); tgt=sp([-51.2,8,2.4])}
   else if(k==='photo1'){ if(S.cer!=='cer1'){S.cer='cer1'; rebuild()} const sp=v=>new THREE.Vector3(v[0],H(v[0],v[1])+v[2],v[1]); pos=sp([-2.4,-33.5,1.7]); tgt=sp([1.2,-70,5.5])}
   else if(k==='photo3'){ if(S.cer!=='cer3'){S.cer='cer3'; rebuild()} const sp=v=>new THREE.Vector3(v[0],H(v[0],v[1])+v[2],v[1]); pos=sp([-30.4,-38.8,1.6]); tgt=sp([-29.8,-53,3.6])}
   else if(k==='ceremony'){pos=world(S.cer,0,cz.d/2+3,1.7); tgt=world(S.cer,0,-cz.d/2+1.6,1.4)}
