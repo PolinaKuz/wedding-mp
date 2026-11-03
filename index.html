@@ -530,6 +530,12 @@ const treeGroup=new THREE.Group(); scene.add(treeGroup);
       e.set(lean*2,i,-lean*2); q.setFromEuler(e); sc.set(.6+r*.14,trunk+ch*.2,.6+r*.14); pos.set(t[0],ty-.2,t[1]); m4.compose(pos,q,sc); tr.setMatrixAt(ti++,m4)});
     treeGroup.add(im)});
   treeGroup.add(tr);
+  // soft dark pools under every canopy (ambient occlusion), so trees sit in the grass instead of floating on it
+  const blobTex=canvasTex(128,(x,n)=>{const g=x.createRadialGradient(n/2,n/2,0,n/2,n/2,n/2); g.addColorStop(0,'rgba(0,0,0,.55)'); g.addColorStop(.55,'rgba(0,0,0,.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,n,n)},false);
+  const bg=new THREE.PlaneGeometry(1,1); bg.rotateX(-Math.PI/2);
+  const blobs=new THREE.InstancedMesh(bg,new THREE.MeshBasicMaterial({map:blobTex,transparent:true,depthWrite:false,color:0x000000,opacity:.9}),TREES.length); blobs.renderOrder=1;
+  const mb=new THREE.Matrix4(); TREES.forEach((t,i)=>{const r=Math.min(Math.max(t[2]*0.95,1.3),5.5)*2.6; mb.compose(new THREE.Vector3(t[0],H(t[0],t[1])+.04,t[1]),new THREE.Quaternion(),new THREE.Vector3(r,1,r)); blobs.setMatrixAt(i,mb)});
+  treeGroup.add(blobs);
   // a few Italian cypresses, as in the drone video
   // the dense hedgerow along the west side of the lawn, traced from Polina's close-up
   if(typeof HEDGE!=='undefined'){ const hg=canopyGeo(4,6,.9), hm=new THREE.MeshStandardMaterial({color:C('#3f5a2c'),vertexColors:true,roughness:1});
@@ -578,17 +584,29 @@ const treeGroup=new THREE.Group(); scene.add(treeGroup);
 })();
 
 // ---------- helpers for zone furniture ----------
-const chairG=(()=>{const parts=[], B=(w,h,d,x,y,z)=>{const g=new THREE.BoxGeometry(w,h,d); g.translate(x,y,z); parts.push(g)};
-  B(.44,.035,.42,0,.45,0);                                   // seat
-  [[-.19,-.18],[.19,-.18],[-.19,.18],[.19,.18]].forEach(([x,z])=>B(.035,.45,.035,x,.225,z)); // legs
-  [-.19,.19].forEach(x=>B(.035,.5,.035,x,.7,.19));            // back posts
-  B(.42,.06,.025,0,.88,.19); B(.42,.04,.025,0,.66,.19);       // back rails (ladder back)
-  return mergeGeos(parts)})();
+// detailed chairs, built from turned legs and rails: a crossback bistro chair (dinner) and a slim spindle-back chair (ceremony)
+function legCyl(r0,r1,h,x,y,z,tilt){const g=new THREE.CylinderGeometry(r1,r0,h,8); if(tilt) g.rotateX(tilt); g.translate(x,y,z); return g}
+const chairG=(()=>{const P=[];
+  [[-.19,-.18],[.19,-.18],[-.19,.18],[.19,.18]].forEach(([x,z])=>P.push(legCyl(.016,.019,.45,x,.225,z)));
+  [-.19,.19].forEach(x=>P.push(legCyl(.016,.017,.48,x,.69,.195)));            // back posts
+  const seat=new THREE.CylinderGeometry(.23,.22,.045,20); seat.scale(1,1,.95); seat.translate(0,.455,0); P.push(seat);   // rush seat
+  const top=new THREE.BoxGeometry(.42,.06,.03); top.translate(0,.9,.195); P.push(top);
+  [1,-1].forEach(sd=>{const x=new THREE.BoxGeometry(.03,.42,.02); x.rotateZ(sd*.72); x.translate(0,.68,.195); P.push(x)});   // the X in the back
+  [[0,.12,-.18],[0,.12,.18]].forEach(([x,y,z])=>{const r=new THREE.CylinderGeometry(.008,.008,.38,6); r.rotateZ(Math.PI/2); r.translate(x,y,z); P.push(r)});
+  return mergeGeos(P)})();
+const cerChairG=(()=>{const P=[];
+  [[-.18,-.17,.06],[.18,-.17,.06],[-.18,.17,-.05],[.18,.17,-.05]].forEach(([x,z,t])=>P.push(legCyl(.013,.016,.46,x,.23,z,t)));
+  [-.18,.18].forEach(x=>P.push(legCyl(.013,.014,.5,x,.7,.2,-.08)));
+  const seat=new THREE.BoxGeometry(.4,.06,.38); seat.translate(0,.47,0); P.push(seat);                                  // cushion
+  for(let i=-2;i<=2;i++){const sp=new THREE.CylinderGeometry(.008,.008,.34,6); sp.rotateX(-.08); sp.translate(i*.07,.7,.205); P.push(sp)}   // spindles
+  const top=new THREE.CylinderGeometry(.012,.012,.38,6); top.rotateZ(Math.PI/2); top.translate(0,.93,.22); P.push(top);
+  [.2,.35].forEach(y=>{const r=new THREE.CylinderGeometry(.007,.007,.36,6); r.rotateZ(Math.PI/2); r.translate(0,y,0); P.push(r)});
+  return mergeGeos(P)})();
 function mergeGeos(gs){ // tiny merge for non-indexed copies
   const pos=[],nor=[]; gs.forEach(g=>{const n=g.index?g.toNonIndexed():g; pos.push(...n.attributes.position.array); nor.push(...n.attributes.normal.array)});
   const out=new THREE.BufferGeometry(); out.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); out.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3)); return out}
-function chairs(list,color,key){ // list of [x,z,rotY]
-  const im=new THREE.InstancedMesh(chairG,mat(color),Math.max(list.length,1)); im.count=list.length; im.castShadow=true;
+function chairs(list,color,key,geo){ // list of [x,z,rotY]
+  const im=new THREE.InstancedMesh(geo||chairG,mat(color,{roughness:.7}),Math.max(list.length,1)); im.count=list.length; im.castShadow=true;
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),one=new THREE.Vector3(1,1,1);
   list.forEach((c,i)=>{q.setFromAxisAngle(new THREE.Vector3(0,1,0),c[2]); m4.compose(new THREE.Vector3(c[0],key?hl(key,c[0],c[1]):0,c[1]),q,one); im.setMatrixAt(i,m4)}); im.userData.layer='seating'; return im}
 // rental / furniture layers: whatever is built while TAG is set gets that layer
@@ -737,7 +755,7 @@ function buildCeremony(key,active){
         spill=Math.max(spill,Math.abs(x)-z.w/2,zz-z.d/2)}
       lastRow=ax+R}
   }
-  g.add(chairs(list,'#FDF8F1',key));
+  g.add(chairs(list,'#FDF8F1',key,cerChairG));
   // parasols over the seating (aisle kept clear)
   if(S.parasols!==false){ const spots=[];
     if(!arc){ for(let zz=front+1.2; zz<=lastRow+.3; zz+=3.1) for(const sd of [-1,1]) spots.push([sd*(aisle/2+.3+2*pitch),zz]); }
@@ -757,8 +775,11 @@ function buildCeremony(key,active){
 let parasolCount=0, aisleLen=12;
 function parasol(x,z){const g=new THREE.Group(); g.position.set(x,0,z); g.userData.layer='shade';
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(.03,.035,2.75,8),mat('#7a5e43')); pole.position.y=1.375; pole.castShadow=true; g.add(pole);
-  const can=new THREE.Mesh(new THREE.ConeGeometry(1.5,.55,10,1,true),parasolCanopyM); can.position.y=2.6; can.castShadow=true; g.add(can);
-  const val=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,.12,10,1,true),parasolCanopyM); val.position.y=2.29; g.add(val);
+  const can=new THREE.Mesh(new THREE.ConeGeometry(1.5,.55,8,2,true),parasolCanopyM); can.position.y=2.6; can.castShadow=true; g.add(can);
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2, rib=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,1.6,4),mat('#6b5643')); rib.position.set(Math.cos(a)*.74,2.58,Math.sin(a)*.74); rib.rotation.set(0,-a,0); rib.rotateZ(Math.PI/2-.35); g.add(rib)}
+  const vs=new THREE.Shape(); vs.moveTo(0,0); for(let i=0;i<=24;i++){vs.lineTo(i/24*9.4, i%3===1?-.06:0)} vs.lineTo(9.4,.13); vs.lineTo(0,.13);
+  const vg=new THREE.CylinderGeometry(1.5,1.5,.14,8,1,true); const val=new THREE.Mesh(vg,parasolCanopyM); val.position.y=2.27; g.add(val);
+  const tie=new THREE.Mesh(new THREE.TorusGeometry(.06,.01,6,12),mat('#6b5643')); tie.rotation.x=Math.PI/2; tie.position.y=1.9; g.add(tie);
   const fin=new THREE.Mesh(new THREE.SphereGeometry(.05,8,6),mat('#7a5e43')); fin.position.y=2.9; g.add(fin);
   return g}
 // ceremony focal point (no arch): a ground-level flower meadow either side of the couple
@@ -875,7 +896,7 @@ function buildPaths(){
     const L=pathLen(pts); pathLengths[p.id]=L; rows.push(`<dt><span class="dot" style="background:${p.col}"></span>${p.name}</dt><dd>${Math.round(L)} m · ${L/0.8<60?'under 1 min':Math.ceil(L/0.8/60)+' min'}</dd>`)});
   const el=document.getElementById('paths'); if(el) el.innerHTML=rows.join('');
 }
-function drawRoutes(){buildPaths(); applyLayers(); renderRentals()}
+function drawRoutes(){buildPaths(); applyLayers(); renderRentals(); if(typeof glowMat!=='undefined'&&glowPts) refreshGlow()}
 // ---------- rental list, counted from the model ----------
 let rentalText='';
 function renderRentals(){
@@ -935,6 +956,7 @@ function applySun(withEnv){
   renderer.toneMappingExposure=p.el>4?0.6:p.el>-3?0.6+(4-p.el)*0.05:0.95;
   if(withEnv!==false) updateEnv();
   festoonMat.emissiveIntensity=p.el<8? Math.min(2.2,(8-p.el)/5): 0; lanternMat.emissiveIntensity=p.el<6? Math.min(2.5,(6-p.el)/3): 0;
+  {const dark=Math.max(0,Math.min(1,(6-p.el)/8)); if(typeof glowMat!=='undefined'){glowMat.opacity=dark*.9; warmLights.forEach(l=>l.intensity=dark*2.2)}}
   $('#clock').textContent=fmt(S.time);
   $('#sunread').textContent=p.el>0? 'Sun '+Math.round(p.el)+'° high · '+compass(p.az) : 'After sunset ('+fmt(SUNSET)+')';
   $('#time').value=S.time;
@@ -986,7 +1008,7 @@ function rebuild(){
   $('#tentNote').innerHTML=t.W+' × '+t.D+' m is '+t.area+' m², with an 8 m dance floor, bar, DJ and a lounge corner. Your marked area is '+zones.tent.w.toFixed(0)+' × '+zones.tent.d.toFixed(0)+' m. '+(t.drop>0.3?'<span class="warn">The ground here varies by about '+t.drop.toFixed(1)+' m, so a level floor needs about '+t.build.toFixed(1)+' m of build-up at the low side. Turning the tent so its long side runs along the slope helps; ask the tent company about a levelled floor.</span>':'The ground is nearly level here.');
   $('#tent').value=S.tent; $('#gval').textContent=S.guests; $('#guests').value=S.guests;
   treeGroup.visible=S.trees; contourGroup.visible=!!S.contours; $('#lyContours').checked=!!S.contours; $('#lyDrawn').checked=S.map==='drawn'; setMap(S.map==='drawn'?'drawn':'sat'); $('#pathLights').checked=S.pathLights!==false; $('#parasols').checked=S.parasols!==false; $('#lyTrees').checked=S.trees; $('#lyLabels').checked=S.labels; $('#lyRoute').checked=S.route;
-  renderDist(); save()}
+  renderDist(); if(typeof refreshGlow==='function') refreshGlow(); save()}
 
 $('#time').addEventListener('input',e=>{S.time=+e.target.value; applySun(false); save()});
 $('#time').addEventListener('change',()=>applySun(true));
@@ -999,7 +1021,7 @@ $('#lyRoute').addEventListener('change',e=>{S.route=e.target.checked; drawRoutes
 $('#copyRent').addEventListener('click',()=>{const done=()=>{$('#copyMsg').textContent='Copied'; setTimeout(()=>$('#copyMsg').textContent='',2000)};
   try{navigator.clipboard.writeText(rentalText).then(done,()=>{$('#copyMsg').textContent='Copy blocked here: select the list and copy it'})}catch(e){$('#copyMsg').textContent='Copy blocked here: select the list and copy it'}});
 LAYERS.forEach(([k,n])=>{const l=document.createElement('label'); l.innerHTML=`<input type="checkbox" id="ly_${k}"> ${n}`; $('#layerToggles').appendChild(l);
-  const cb=l.querySelector('input'); cb.checked=(S.layers||{})[k]!==false; cb.addEventListener('change',()=>{S.layers=Object.assign({},S.layers,{[k]:cb.checked}); applyLayers(); save()})});
+  const cb=l.querySelector('input'); cb.checked=(S.layers||{})[k]!==false; cb.addEventListener('change',()=>{S.layers=Object.assign({},S.layers,{[k]:cb.checked}); applyLayers(); refreshGlow(); save()})});
 $('#pathLights').addEventListener('change',e=>{S.pathLights=e.target.checked; buildPaths(); save()});
 $('#lyDrawn').addEventListener('change',e=>{S.map=e.target.checked?'drawn':'sat'; setMap(S.map); save()});
 $('#lyContours').addEventListener('change',e=>{S.contours=e.target.checked; contourGroup.visible=S.contours; save()});
@@ -1050,10 +1072,22 @@ const endDrag=()=>{if(!drag) return;
 canvas.addEventListener('pointerup',endDrag); canvas.addEventListener('pointercancel',endDrag);
 
 // ---------- loop ----------
+// ---------- evening glow: halos around every bulb and lantern, plus warm light pooling on the tables ----------
+const glowTex=canvasTex(64,(x,n)=>{const g=x.createRadialGradient(n/2,n/2,0,n/2,n/2,n/2); g.addColorStop(0,'rgba(255,236,190,1)'); g.addColorStop(.25,'rgba(255,200,120,.55)'); g.addColorStop(1,'rgba(255,170,80,0)'); x.fillStyle=g; x.fillRect(0,0,n,n)});
+const glowMat=new THREE.PointsMaterial({map:glowTex,size:1.1,sizeAttenuation:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0});
+let glowPts=null; const warmLights=[0,1,2].map(()=>{const l=new THREE.PointLight(0xffc27a,0,26,1.6); scene.add(l); return l});
+function refreshGlow(){ if(glowPts){scene.remove(glowPts); glowPts.geometry.dispose()} const pos=[], v=new THREE.Vector3(), m=new THREE.Matrix4();
+  scene.updateMatrixWorld(true);
+  scene.traverse(o=>{ if(!o.visible) return; let p=o, vis=true; while(p){ if(p.visible===false){vis=false;break} p=p.parent } if(!vis) return;
+    if(o.isInstancedMesh&&o.material===festoonMat){ for(let i=0;i<o.count;i++){o.getMatrixAt(i,m); v.setFromMatrixPosition(m).applyMatrix4(o.matrixWorld); pos.push(v.x,v.y,v.z)} }
+    else if(o.isMesh&&o.material===lanternMat){ o.getWorldPosition(v); pos.push(v.x,v.y,v.z) } });
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); glowPts=new THREE.Points(g,glowMat); glowPts.renderOrder=9; scene.add(glowPts);
+  const at=(k,y)=>{const p=zones[k].group.position; return new THREE.Vector3(p.x,p.y+y,p.z)};
+  warmLights[0].position.copy(at('dinner',3.2)); warmLights[1].position.copy(at('cocktail',3)); warmLights[2].position.copy(at('tent',2.8)); }
 function resize(){const r=stage.getBoundingClientRect(); renderer.setSize(r.width,r.height,false); camera.aspect=r.width/r.height; camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(stage); resize();
 function frame(t){requestAnimationFrame(frame); if(tw) tw(t); controls.update(); renderer.render(scene,camera); placeLabels()}
-applySun(); rebuild(); requestAnimationFrame(frame);
+applySun(); rebuild(); refreshGlow(); applySun(false); requestAnimationFrame(frame);
 })();
 </script>
 
