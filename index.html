@@ -71,6 +71,8 @@ dd{margin:0;font-variant-numeric:tabular-nums;color:var(--muted);text-align:righ
 .lab.dim{opacity:.6;font-weight:500}
 .movehint{position:absolute;right:14px;bottom:14px;background:var(--slate);color:#fff;font-size:11px;letter-spacing:.08em;
   padding:8px 12px;border-radius:999px;margin-bottom:env(safe-area-inset-bottom,0px)}
+.locked-ui{opacity:.45;pointer-events:none}
+#lock[aria-pressed=true]::before{content:"";display:inline-block;width:8px;height:9px;margin-right:6px;border:1.5px solid currentColor;border-radius:2px;vertical-align:-1px}
 .rent{display:flex;flex-direction:column;gap:12px}
 .rent h3{margin:0 0 4px;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .rent ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:12px}
@@ -151,7 +153,9 @@ dd{margin:0;font-variant-numeric:tabular-nums;color:var(--muted);text-align:righ
 
     <section aria-labelledby="h-move">
       <h2 id="h-move">Rearrange</h2>
-      <div class="row"><button id="move" aria-pressed="false">Move things</button><button id="rot" hidden>Rotate selected 45°</button><button id="reset">Reset layout</button></div>
+      <div class="row"><button id="lock" aria-pressed="true">Layout locked</button><button id="move" aria-pressed="false">Move things</button><button id="rot" hidden>Rotate selected 45°</button><button id="reset">Reset layout</button></div>
+      <p class="note" id="lockNote"></p>
+      <div class="row"><button id="copyLayout">Copy my layout</button><span class="note" id="copyLayoutMsg" role="status"></span></div>
       <p class="note">Turn on, then drag any zone on the lawn, any single stand or high table in the drinks area, or the round handles on the pool-garden wall (blue: corners, orange: the gate and the opening), or the coloured dots on the paths. Distances update as you go. Your layout is kept in this browser.</p>
     </section>
 
@@ -1027,6 +1031,16 @@ $('#lyDrawn').addEventListener('change',e=>{S.map=e.target.checked?'drawn':'sat'
 $('#lyContours').addEventListener('change',e=>{S.contours=e.target.checked; contourGroup.visible=S.contours; save()});
 $('#lyTrees').addEventListener('change',e=>{S.trees=e.target.checked; treeGroup.visible=S.trees; save()});
 function rotate(k){const L=layout[k]=layout[k]||{}; L.r=((L.r??ZONES[k].r??0)+Math.PI/4)%(Math.PI*2); applyLayout(k); rebuild()}
+// ---------- lock: freezes positions so nothing can be dragged, turned or reset by accident ----------
+const lockables=()=>['move','reset','turnCer','rot'].map(id=>document.getElementById(id)).concat([...document.querySelectorAll('input[name=seat]')].map(i=>i.parentElement));
+function applyLock(){const L=S.locked!==false; $('#lock').setAttribute('aria-pressed',L); $('#lock').textContent=L?'Layout locked':'Unlocked: tap to lock';
+  if(L&&moving){moving=false; $('#move').setAttribute('aria-pressed',false); $('#movehint').hidden=true; fenceHandles.visible=false; pathHandles.visible=false; selected=null; selProp=null; showRing(); $('#rot').hidden=true; highlight()}
+  lockables().forEach(el=>{if(!el) return; el.classList.toggle('locked-ui',L); if(el.tagName==='BUTTON') el.disabled=L});
+  $('#lockNote').textContent=L?'The plan is locked: nothing can be moved, turned or reset. Tap the lock to make changes.':'Unlocked: you can move things now. Lock again when you are happy.'}
+$('#lock').onclick=()=>{S.locked=!(S.locked!==false); applyLock(); save()};
+$('#copyLayout').onclick=()=>{const txt=JSON.stringify({layout,state:{cer:S.cer,seat:S.seat,tent:S.tent,guests:S.guests,parasols:S.parasols,pathLights:S.pathLights}});
+  const msg=t=>{$('#copyLayoutMsg').textContent=t; setTimeout(()=>$('#copyLayoutMsg').textContent='',4000)};
+  try{navigator.clipboard.writeText(txt).then(()=>msg('Copied. Paste it to Claude to make it the default for everyone.'),()=>msg('Copy was blocked here.'))}catch(e){msg('Copy was blocked here.')}};
 $('#turnCer').onclick=()=>rotate(S.cer);
 $('#parasols').addEventListener('change',e=>{S.parasols=e.target.checked; rebuild()});
 document.querySelectorAll('input[name=seat]').forEach(i=>i.addEventListener('change',()=>{S.seat=Object.assign({},S.seat,{[S.cer]:i.value}); rebuild()}));
@@ -1041,7 +1055,7 @@ function highlight(){Object.entries(zones).forEach(([k,z])=>{z.pad.userData.fill
 function setPtr(e){const r=canvas.getBoundingClientRect(); ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1); ray.setFromCamera(ptr,camera)}
 let selProp=null; const selRing=new THREE.Mesh(new THREE.RingGeometry(1.5,1.7,40),new THREE.MeshBasicMaterial({color:C('#3F5E78'),transparent:true,opacity:.85,depthTest:false})); selRing.rotation.x=-Math.PI/2; selRing.renderOrder=5; selRing.visible=false; scene.add(selRing);
 function showRing(){if(!selProp){selRing.visible=false;return} const o=props[selProp], w=new THREE.Vector3(); o.getWorldPosition(w); const r=selProp.startsWith('ht')?.6:2.1; selRing.scale.setScalar(r/1.6); selRing.position.set(w.x,w.y+.08,w.z); selRing.visible=true}
-canvas.addEventListener('pointerdown',e=>{if(!moving) return; setPtr(e);
+canvas.addEventListener('pointerdown',e=>{if(!moving||S.locked!==false) return; setPtr(e);
   const phh=ray.intersectObjects(pathHandles.children)[0];
   if(phh){ drag={path:phh.object.userData.ph}; selProp=null; showRing(); $('#rot').hidden=true; controls.enabled=false; canvas.setPointerCapture(e.pointerId); return }
   const fh=ray.intersectObjects(fenceHandles.children)[0];
@@ -1087,7 +1101,7 @@ function refreshGlow(){ if(glowPts){scene.remove(glowPts); glowPts.geometry.disp
 function resize(){const r=stage.getBoundingClientRect(); renderer.setSize(r.width,r.height,false); camera.aspect=r.width/r.height; camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(stage); resize();
 function frame(t){requestAnimationFrame(frame); if(tw) tw(t); controls.update(); renderer.render(scene,camera); placeLabels()}
-applySun(); rebuild(); refreshGlow(); applySun(false); requestAnimationFrame(frame);
+applySun(); rebuild(); refreshGlow(); applySun(false); applyLock(); requestAnimationFrame(frame);
 })();
 </script>
 
