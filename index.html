@@ -382,9 +382,20 @@ const STONE='#d4ae68', TILE='#b97a5c';
  [-13.5,-58.2,-7.5,-50.6,3.2,4.7,'z'],[51.1,-61.9,60,-56.2,3,4.4,'x']]
  .forEach(b=>scene.add(gable(b[0],b[1],b[2],b[3],b[4],b[5],b[6],STONE,TILE)));
 // garage details: dark doors on its south gable, and a low lean-to beside it
-(function(){const by=H(-10.5,-50.6)-.15; const d=new THREE.Mesh(new THREE.BoxGeometry(2.6,2.3,.08),mat('#2d2a27')); d.position.set(-10.5,by+1.15,-50.58); scene.add(d);
+(function(){const by=H(-10.5,-50.6)-.15; const d=new THREE.Mesh(new THREE.BoxGeometry(2.6,2.3,.08),mat('#2d2a27')); d.position.set(-12.2,by+1.15,-50.58); scene.add(d);
   const lt=new THREE.Mesh(worldUV(new THREE.BoxGeometry(3,2.3,4.5),2.5,-15,-57),stoneMat); lt.position.set(-15,H(-15,-57)-.1+1.15,-57); lt.castShadow=lt.receiveShadow=true; scene.add(lt);
   const lr=new THREE.Mesh(new THREE.BoxGeometry(3.4,.12,5),tileMat); lr.position.set(-15,H(-15,-57)+2.3,-57); lr.rotation.x=.08; lr.castShadow=true; scene.add(lr);
+})();
+// gravel drive from the lane down between the cedars to the lawn, and the rope fence on posts in front of the family parking (ceremony 1 photo)
+(function(){const gt=canvasTex(128,(x,n)=>{const r=rnd(8); x.fillStyle='#d8cfb8'; x.fillRect(0,0,n,n); for(let i=0;i<3000;i++){const c=190+r()*55|0; x.fillStyle=`rgba(${c},${c-8|0},${c-25|0},.8)`; x.fillRect(r()*n,r()*n,1.5,1.5)}});
+  const pts=[[2.1,-70.6,3.2],[2.0,-64,3.4],[1.6,-57,3.6],[1.2,-51.5,5.5],[0.8,-49.5,6.5]], pos=[], idx=[];
+  pts.forEach((p,i)=>{pos.push(p[0]-p[2]/2,H(p[0]-p[2]/2,p[1])+.04,p[1], p[0]+p[2]/2,H(p[0]+p[2]/2,p[1])+.04,p[1]); if(i){const o=(i-1)*2; idx.push(o,o+1,o+2, o+1,o+3,o+2)}});
+  const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals(); worldUV(g,1.5,0,0);
+  const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({map:gt,roughness:1,polygonOffset:true,polygonOffsetFactor:-2,side:THREE.DoubleSide})); m.receiveShadow=true; scene.add(m);
+  const post=mat('#9a8466'), rope=new THREE.LineBasicMaterial({color:C('#e8e1d2')});
+  [[[-7.4,-50.4],[-1.4,-50.3]],[[3.6,-50.2],[11,-50.0]]].forEach(([a,b])=>{const n=Math.max(2,Math.round(Math.hypot(b[0]-a[0],b[1]-a[1])/2.6)+1), rp=[];
+    for(let i=0;i<n;i++){const f=i/(n-1), x=a[0]+(b[0]-a[0])*f, z=a[1]+(b[1]-a[1])*f, y=H(x,z); const p=new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,1.1,6),post); p.position.set(x,y+.55,z); p.castShadow=true; scene.add(p); rp.push(new THREE.Vector3(x,y+.85,z))}
+    const lg=new THREE.BufferGeometry().setFromPoints(rp); scene.add(new THREE.Line(lg,rope))});
 })();
 // whitewashed stable annex beside the west-wing gable (from Polina's video)
 // low wall (about 1 m) closing the courtyard between the two wings, with an arched entrance at its left (west) end
@@ -509,6 +520,7 @@ buildFence();
 // ---------- trees ----------
 // trees whose canopy reaches over the dinner table get their crowns lifted to about 2.3 m (pruned so guests and waiters pass underneath)
 function overTable(x,z){const D=ZONES.dinner, r=D.r||0, c=Math.cos(r), s=Math.sin(r), rx=x-D.x, rz=z-D.z, lx=rx*c-rz*s, lz=rx*s+rz*c; return Math.abs(lx)<3.8&&Math.abs(lz)<19}
+const CEDARS=[[-0.6,-65.8,2.2],[-0.6,-62.7,1.6],[4.0,-65.6,2.3],[4.2,-61.4,1.9],[4.4,-57.4,1.8],[8.4,-62.6,2.0],[8.5,-65.6,1.8]];
 // trees: lumpy multi-lobed canopies (oak, olive and fruit-tree shapes), shaded darker underneath, tapered trunks
 function mergeColored(parts){const pos=[],nor=[],col=[];
   parts.forEach(([g,c])=>{const n=g.index?g.toNonIndexed():g; n.computeVertexNormals(); const p=n.attributes.position.array, q=n.attributes.normal.array;
@@ -523,7 +535,9 @@ const treeGroup=new THREE.Group(); scene.add(treeGroup);
 (function(){
   const variants=[canopyGeo(1,6,1),canopyGeo(2,7,.8),canopyGeo(3,5,1.2)];
   const cmat=new THREE.MeshStandardMaterial({color:0xffffff,vertexColors:true,roughness:.95,envMapIntensity:.5});
-  const bins=variants.map(()=>[]); TREES.forEach((t,i)=>bins[i%3].push(t));
+  // the tall blue Atlas cedars either side of the drive by the garage (from Polina's ceremony 1 photo) are drawn separately
+  const isCedar=t=>CEDARS.some(c=>Math.abs(c[0]-t[0])<.05&&Math.abs(c[1]-t[1])<.05);
+  const bins=variants.map(()=>[]); TREES.filter(t=>!isCedar(t)).forEach((t,i)=>bins[i%3].push(t));
   const trG=new THREE.CylinderGeometry(.11,.2,1,7); trG.translate(0,.5,0);
   const tr=new THREE.InstancedMesh(trG,mat('#5b4a3a'),TREES.length); tr.castShadow=true;
   const m4=new THREE.Matrix4(), q=new THREE.Quaternion(), e=new THREE.Euler(), sc=new THREE.Vector3(), pos=new THREE.Vector3();
@@ -544,6 +558,14 @@ const treeGroup=new THREE.Group(); scene.add(treeGroup);
   const blobs=new THREE.InstancedMesh(bg,new THREE.MeshBasicMaterial({map:blobTex,transparent:true,depthWrite:false,color:0x000000,opacity:.9}),TREES.length); blobs.renderOrder=1;
   const mb=new THREE.Matrix4(); TREES.forEach((t,i)=>{const r=Math.min(Math.max(t[2]*0.95,1.3),5.5)*2.6; mb.compose(new THREE.Vector3(t[0],H(t[0],t[1])+.04,t[1]),new THREE.Quaternion(),new THREE.Vector3(r,1,r)); blobs.setMatrixAt(i,mb)});
   treeGroup.add(blobs);
+  // Atlas cedars: tall, tiered, blue-green
+  const cedM=new THREE.MeshStandardMaterial({color:C('#3e5a57'),roughness:1,flatShading:true,vertexColors:false});
+  CEDARS.forEach((c,i)=>{const r=rnd(50+i), g=new THREE.Group(), ht=12+r()*4, base=H(c[0],c[1]);
+    const tr=new THREE.Mesh(new THREE.CylinderGeometry(.18,.35,ht*.55,7),mat('#5b4a3a')); tr.position.y=ht*.27; tr.castShadow=true; g.add(tr);
+    // irregular flat tiers of foliage, like an old Atlas cedar, narrowing to a loose top
+    for(let k=0;k<9;k++){const f=k/8, rad=(c[2]*1.6+1.6)*(1-f*.7)*(.75+r()*.45), lobe=new THREE.Mesh(new THREE.IcosahedronGeometry(1,1),cedM);
+      lobe.scale.set(rad,ht*.075*(1+r()*.5),rad*(.8+r()*.4)); lobe.position.set((r()-.5)*1.4,ht*(.32+f*.62),(r()-.5)*1.4); lobe.rotation.y=r()*3; lobe.castShadow=true; lobe.receiveShadow=true; g.add(lobe)}
+    g.position.set(c[0],base,c[1]); treeGroup.add(g)});
   // a few Italian cypresses, as in the drone video
   // the dense hedgerow along the west side of the lawn, traced from Polina's close-up
   if(typeof HEDGE!=='undefined'){ const hg=canopyGeo(4,6,.9), hm=new THREE.MeshStandardMaterial({color:C('#3f5a2c'),vertexColors:true,roughness:1});
@@ -980,19 +1002,20 @@ function applySun(withEnv){
 const CHIPS=[[930,'Guests arrive','arrival'],[960,'Ceremony','ceremony'],[1005,'Drinks','drinks'],[1170,'Dinner','dinner'],[1200,'Food served','dinner'],[0,'Sunset','overview']];
 CHIPS.forEach(c=>{const b=document.createElement('button'); const t=c[0]||SUNSET-10;
   b.innerHTML='<b>'+fmt(c[0]||SUNSET)+'</b>'+c[1]; b.onclick=()=>{S.time=t; applySun(); go(c[2]); save()}; $('#chips').appendChild(b)});
-const VIEWS={overview:'Overview',top:'From above',photo3:'Ceremony 3, as in your photo',arrival:'Arriving guest',ceremony:'From the aisle',drinks:'Courtyard drinks',dinner:'At the table',party:'Tent'};
+const VIEWS={overview:'Overview',top:'From above',photo3:'Ceremony 3, as in your photo',photo1:'Ceremony 1, as in your photo',arrival:'Arriving guest',ceremony:'From the aisle',drinks:'Courtyard drinks',dinner:'At the table',party:'Tent'};
 Object.entries(VIEWS).forEach(([k,n])=>{const b=document.createElement('button'); b.textContent=n; b.onclick=()=>go(k); $('#views').appendChild(b)});
 [['Drinks',COL.cocktail],['Welcome',COL.welcome],['Ceremony',COL.cer],['Dinner',COL.dinner],['Party tent','#e8e1d3'],['Catering',COL.kitchen],['Parking',COL.parking],['Guest route','#3F5E78']]
  .forEach(([n,c])=>{const s=document.createElement('span'); s.innerHTML='<span class="dot" style="background:'+c+'"></span>'+n; $('#legend').appendChild(s)});
 
 function world(k,lx,lz,y){const g=zones[k].group; const v=new THREE.Vector3(lx,0,lz).applyMatrix4(g.matrixWorld); v.y=H(v.x,v.z)+y; return v}
 function go(k){
-  camera.fov=k==='photo3'?64:42; camera.updateProjectionMatrix();
+  camera.fov=(k==='photo3'||k==='photo1')?64:42; camera.updateProjectionMatrix();
   scene.updateMatrixWorld(); let pos,tgt;
   const cz=zones[S.cer], dz=zones.dinner;
   if(k==='overview'){pos=new THREE.Vector3(32,72,98);tgt=new THREE.Vector3(-30,0,-14)}
   else if(k==='top'){pos=new THREE.Vector3(-20,230,1);tgt=new THREE.Vector3(-20,0,0)}
   else if(k==='arrival'){pos=world('parking',zones.parking.w/2-6,-1,1.7); tgt=center('welcome').clone().setY(H(center('welcome').x,center('welcome').z)+1.4)}
+  else if(k==='photo1'){ if(S.cer!=='cer1'){S.cer='cer1'; rebuild()} const sp=v=>new THREE.Vector3(v[0],H(v[0],v[1])+v[2],v[1]); pos=sp([-2.4,-33.5,1.7]); tgt=sp([1.2,-70,5.5])}
   else if(k==='photo3'){ if(S.cer!=='cer3'){S.cer='cer3'; rebuild()} const sp=v=>new THREE.Vector3(v[0],H(v[0],v[1])+v[2],v[1]); pos=sp([-30.4,-38.8,1.6]); tgt=sp([-29.8,-53,3.6])}
   else if(k==='ceremony'){pos=world(S.cer,0,cz.d/2+3,1.7); tgt=world(S.cer,0,-cz.d/2+1.6,1.4)}
   else if(k==='drinks'){pos=world('cocktail',1.5,8.6,2.6); tgt=world('cocktail',-1.5,-11,1.2)}
