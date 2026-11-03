@@ -142,7 +142,7 @@ dd{margin:0;font-variant-numeric:tabular-nums;color:var(--muted);text-align:righ
       <h2 id="h-paths">Paths</h2>
       <dl id="paths"></dl>
       <div class="row toggles"><label><input type="checkbox" id="pathLights" checked> Path lanterns</label></div>
-      <p class="note">Walking distance along each path, at a relaxed pace. Guest paths are 1.6 m wide (matting or gravel); the service path is 2.4 m for trolleys. In "Move things", drag the coloured dots to reroute a path.</p>
+      <p class="note">Walking distance along each path, at a relaxed pace. Guest paths are 1.6 m wide (matting or gravel); the service path is 2.4 m for trolleys. Each stretch is paved once; white dots are shared junctions. In "Move things", drag the dots to reroute.</p>
     </section>
 
     <section aria-labelledby="h-dist">
@@ -853,18 +853,23 @@ const serviceMat=new THREE.LineDashedMaterial({color:C('#6e7f3a'),dashSize:1,gap
 function center(k){return zones[k].group.position}
 // ---------- guest & service paths ----------
 // each path is a polyline of waypoints; anchors follow the ceremony spot and the pool-garden gate/opening
+// one network, no doubled routes: shared junctions (white dots) join the branches, and each stretch of ground is paved once.
+// J1 = the welcome, J2 = where the walk to dinner leaves the arrival path. Guests use the welcome <-> ceremony branch both ways.
+const JUNC_DEFAULT={J1:[-44,-38.5], J2:[-49.5,-38.6]};
+let JUNC=Object.assign({},JUNC_DEFAULT,layout.junctions||{});
 const PATHS_DEFAULT=[
-  {id:'arrive', name:'Arrival: parking → welcome', kind:'guest', col:'#3F5E78', pts:[[-65,-38],[-55,-38.6],[-44,-38.5]]},
-  {id:'toCer',  name:'Welcome → ceremony',          kind:'guest', col:'#9CB7D4', pts:[[-44,-38.5],'cerBack']},
-  {id:'toDrinks',name:'Ceremony → drinks (via the gate)', kind:'guest', col:'#E9B07F', pts:['cerBack',[-37.2,-44.5],'gateOut','gateIn']},
-  {id:'toDinner',name:'Drinks → dinner (via the west opening)', kind:'guest', col:'#C98E5A', pts:['openIn','openOut',[-49.5,-45],[-48.5,-30],[-45.5,-12],[-52.5,0],[-58.6,7.2]]},
-  {id:'toTent', name:'Dinner → party tent',          kind:'guest', col:'#8f9e45', pts:[[-62.9,25.1],[-56.5,23.2],[-31,13],[-9.6,3.6]]},
-  {id:'service',name:'Service: kitchen → table',     kind:'service', col:'#7a6a55', pts:[[-71,-14],[-62,-14.5],[-56.5,-2],[-59.8,6.6]]}];
-let PATHS=PATHS_DEFAULT.map(p=>{const saved=(layout.paths||{})[p.id]; return Object.assign({},p,{pts:saved?saved.map((q,i)=>typeof p.pts[i]==='string'?p.pts[i]:q):p.pts.slice()})});
+  {id:'arrive', name:'Arrival: parking → welcome',            kind:'guest', col:'#3F5E78', pts:[[-65,-38],'J2','J1']},
+  {id:'toCer',  name:'Welcome ↔ ceremony (walked both ways)', kind:'guest', col:'#9CB7D4', pts:['J1','cerBack']},
+  {id:'toDrinks',name:'Welcome → drinks, through the gate',   kind:'guest', col:'#E9B07F', pts:['J1',[-37,-40],'gateOut','gateIn']},
+  {id:'toDinner',name:'Drinks → dinner, out of the west opening', kind:'guest', col:'#C98E5A', pts:['openIn','openOut','J2',[-48.5,-30],[-45.5,-12],[-52.5,0],[-58.6,7.2]]},
+  {id:'toTent', name:'Dinner → party tent',                   kind:'guest', col:'#8f9e45', pts:[[-62.9,25.1],[-56.5,23.2],[-31,13],[-9.6,3.6]]},
+  {id:'service',name:'Service: kitchen → table',              kind:'service', col:'#7a6a55', pts:[[-71,-14],[-62,-14.5],[-56.5,-2],[-59.8,6.6]]}];
+let PATHS=PATHS_DEFAULT.map(p=>{const saved=(layout.paths||{})[p.id]; return Object.assign({},p,{pts:saved&&saved.length===p.pts.length?saved.map((q,i)=>typeof p.pts[i]==='string'?p.pts[i]:q):p.pts.slice()})});
 const pathGroup=new THREE.Group(); scene.add(pathGroup);
 const pathHandles=new THREE.Group(); pathHandles.visible=false; scene.add(pathHandles);
 const lanternMat=new THREE.MeshStandardMaterial({color:C('#fff3d6'),emissive:C('#ffc56b'),emissiveIntensity:0});
 function anchorPt(a){
+  if(JUNC[a]) return JUNC[a];
   if(a==='cerBack'){const z=zones[S.cer]; z.group.updateMatrixWorld(); const v=new THREE.Vector3(0,0,z.d/2+1.2).applyMatrix4(z.group.matrixWorld); return [v.x,v.z]}
   const P=FENCE.pts, g=a.startsWith('gate')?FENCE.gate:FENCE.open, A=P[g.seg],B=P[g.seg+1], L=Math.hypot(B[0]-A[0],B[1]-A[1])||1, f=Math.min(Math.max(g.d/L,0),1);
   const cx=A[0]+(B[0]-A[0])*f, cz=A[1]+(B[1]-A[1])*f; let nx=-(B[1]-A[1])/L, nz=(B[0]-A[0])/L;
@@ -898,6 +903,7 @@ function buildPaths(){
     // drag handles for the free waypoints
     p.pts.forEach((q,i)=>{ if(typeof q==='string') return; const h=new THREE.Mesh(new THREE.SphereGeometry(.42,14,10),new THREE.MeshBasicMaterial({color:C(p.col),depthTest:false})); h.position.set(q[0],groundAt(q[0],q[1])+1.0,q[1]); h.renderOrder=6; h.userData.ph={id:p.id,i}; pathHandles.add(h)});
     const L=pathLen(pts); pathLengths[p.id]=L; rows.push(`<dt><span class="dot" style="background:${p.col}"></span>${p.name}</dt><dd>${Math.round(L)} m · ${L/0.8<60?'under 1 min':Math.ceil(L/0.8/60)+' min'}</dd>`)});
+  Object.entries(JUNC).forEach(([k,q])=>{const h=new THREE.Mesh(new THREE.SphereGeometry(.5,14,10),new THREE.MeshBasicMaterial({color:C('#ffffff'),depthTest:false})); h.position.set(q[0],groundAt(q[0],q[1])+1.0,q[1]); h.renderOrder=7; h.userData.ph={junc:k}; pathHandles.add(h)});
   const el=document.getElementById('paths'); if(el) el.innerHTML=rows.join('');
 }
 function drawRoutes(){buildPaths(); applyLayers(); renderRentals(); if(typeof glowMat!=='undefined'&&glowPts) refreshGlow()}
@@ -1044,7 +1050,7 @@ $('#copyLayout').onclick=()=>{const txt=JSON.stringify({layout,state:{cer:S.cer,
 $('#turnCer').onclick=()=>rotate(S.cer);
 $('#parasols').addEventListener('change',e=>{S.parasols=e.target.checked; rebuild()});
 document.querySelectorAll('input[name=seat]').forEach(i=>i.addEventListener('change',()=>{S.seat=Object.assign({},S.seat,{[S.cer]:i.value}); rebuild()}));
-$('#reset').onclick=()=>{layout={}; Object.keys(zones).forEach(applyLayout); Object.values(props).forEach(o=>{const h=o.userData.home; o.position.set(h.x,0,h.z); o.rotation.y=h.r}); settle('cocktail'); FENCE=JSON.parse(JSON.stringify(FENCE_DEFAULT)); buildFence(); fenceHandles.visible=moving; PATHS=PATHS_DEFAULT.map(p=>Object.assign({},p,{pts:p.pts.slice()})); pathHandles.visible=moving; selProp=null; showRing(); rebuild()};
+$('#reset').onclick=()=>{layout={}; Object.keys(zones).forEach(applyLayout); Object.values(props).forEach(o=>{const h=o.userData.home; o.position.set(h.x,0,h.z); o.rotation.y=h.r}); settle('cocktail'); FENCE=JSON.parse(JSON.stringify(FENCE_DEFAULT)); buildFence(); fenceHandles.visible=moving; PATHS=PATHS_DEFAULT.map(p=>Object.assign({},p,{pts:p.pts.slice()})); JUNC=Object.assign({},JUNC_DEFAULT); pathHandles.visible=moving; selProp=null; showRing(); rebuild()};
 
 // ---------- move mode ----------
 let moving=false, selected=null, drag=null;
@@ -1070,7 +1076,7 @@ canvas.addEventListener('pointerdown',e=>{if(!moving||S.locked!==false) return; 
   const k=h.object.userData.zone; selected=k; $('#rot').hidden=false; $('#rot').textContent='Rotate '+NAMES[k].split(' ·')[0].toLowerCase(); highlight();
   ray.ray.intersectPlane(plane,hit); drag={k,off:zones[k].group.position.clone().sub(hit)}; controls.enabled=false; canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener('pointermove',e=>{if(!drag) return; setPtr(e); if(!ray.ray.intersectPlane(plane,hit)) return;
-  if(drag.path){const p=PATHS.find(q=>q.id===drag.path.id); p.pts[drag.path.i]=[+hit.x.toFixed(2),+hit.z.toFixed(2)]; buildPaths(); pathHandles.visible=true; return}
+  if(drag.path){const P2=[+hit.x.toFixed(2),+hit.z.toFixed(2)]; if(drag.path.junc) JUNC[drag.path.junc]=P2; else PATHS.find(q=>q.id===drag.path.id).pts[drag.path.i]=P2; buildPaths(); pathHandles.visible=true; return}
   if(drag.fence){const f=drag.fence; plane.constant=-(TERRACE?TERRACE.y:0); ray.ray.intersectPlane(plane,hit); plane.constant=0;
     if(f.type==='pt'){FENCE.pts[f.i]=[+hit.x.toFixed(2),+hit.z.toFixed(2)]}
     else {const n=nearestOnFence(hit.x,hit.z); if(n) FENCE[f.type]={seg:n.seg,d:+n.d.toFixed(2)}}
@@ -1079,7 +1085,7 @@ canvas.addEventListener('pointermove',e=>{if(!drag) return; setPtr(e); if(!ray.r
     o.position.y=hl('cocktail',o.position.x,o.position.z)-c.position.y; showRing(); return}
   const p=hit.add(drag.off); zones[drag.k].group.position.set(p.x,H(p.x,p.z),p.z); conform(drag.k); renderDist()});
 const endDrag=()=>{if(!drag) return;
-  if(drag.path){layout.paths=layout.paths||{}; const p=PATHS.find(q=>q.id===drag.path.id); layout.paths[p.id]=p.pts; drag=null; controls.enabled=true; save(); return}
+  if(drag.path){ if(drag.path.junc){layout.junctions=Object.assign({},JUNC)} else {layout.paths=layout.paths||{}; const p=PATHS.find(q=>q.id===drag.path.id); layout.paths[p.id]=p.pts} drag=null; controls.enabled=true; save(); return}
   if(drag.fence){layout.fence=JSON.parse(JSON.stringify(FENCE)); drag=null; controls.enabled=true; buildPaths(); save(); return}
   if(drag.prop){const o=props[drag.prop]; layout.props=layout.props||{}; layout.props[drag.prop]={x:+o.position.x.toFixed(2),z:+o.position.z.toFixed(2),r:o.rotation.y}; drag=null; controls.enabled=true; save(); return}
   const g=zones[drag.k].group; layout[drag.k]=Object.assign(layout[drag.k]||{},{x:+g.position.x.toFixed(2),z:+g.position.z.toFixed(2),r:g.rotation.y}); drag=null; controls.enabled=true; ['parking','welcome','cocktail','kitchen'].forEach(settle); rebuild(); save()};
