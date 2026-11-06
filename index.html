@@ -195,7 +195,7 @@ dd{margin:0;font-variant-numeric:tabular-nums;color:var(--muted);text-align:righ
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Sky.js"></script>
 <script>
-const ZONES={"cocktail": {"x": -40.0, "z": -56.3, "w": 13.2, "d": 30.6}, "welcome": {"x": -41.36, "z": -34.46, "w": 19.3, "d": 15.0}, "cer1": {"x": -2.65, "z": -38.92, "w": 12.1, "d": 20.1}, "cer2": {"x": -20.0, "z": -10.6, "w": 16.9, "d": 23.5}, "cer3": {"x": -24.23, "z": -41.88, "w": 16.7, "d": 15.0, "r": 0.7854}, "kitchen": {"x": -75.0, "z": -16.3, "w": 8.3, "d": 14.2}, "dinner": {"x": -56.6, "z": 28.0, "w": 7.0, "d": 44.0, "r": -0.28}, "tent": {"x": 3.55, "z": 2.45, "w": 33.9, "d": 25.4}, "parking": {"x": -85.9, "z": -38.0, "w": 41.4, "d": 20.6}};
+const ZONES={"toilets": {"x": -34.0, "z": 21.0, "w": 7.5, "d": 4.5},"cocktail": {"x": -40.0, "z": -56.3, "w": 13.2, "d": 30.6}, "welcome": {"x": -41.36, "z": -34.46, "w": 19.3, "d": 15.0}, "cer1": {"x": -2.65, "z": -38.92, "w": 12.1, "d": 20.1}, "cer2": {"x": -20.0, "z": -10.6, "w": 16.9, "d": 23.5}, "cer3": {"x": -24.23, "z": -41.88, "w": 16.7, "d": 15.0, "r": 0.7854}, "kitchen": {"x": -75.0, "z": -16.3, "w": 8.3, "d": 14.2}, "dinner": {"x": -56.6, "z": 28.0, "w": 7.0, "d": 44.0, "r": -0.28}, "tent": {"x": 3.55, "z": 2.45, "w": 33.9, "d": 25.4}, "parking": {"x": -85.9, "z": -38.0, "w": 41.4, "d": 20.6}};
 const TREES=[[88.1, -97.5, 2.0], [82.9, -88.9, 1.6], [82.8, -84.5, 2.2], [86.9, -85.2, 1.6], [84.0, -80.5, 2.2], [87.3, -80.9, 1.7], [83.2, -77.3, 1.6], [79.4, -73.1, 1.6], [84.0, -72.8, 1.6], [79.8, -68.3, 1.8], [78.8, -63.8, 1.6], [75.7, -51.4, 1.9], [71.2, -43.1, 1.7], [66.2, -31.1, 1.6], [62.7, -22.6, 1.6], [-91.9, -96.0, 1.7], [92.1, -95.3, 1.2], [88.9, -91.8, 2.0], [91.9, -91.5, 1.2], [91.6, -84.6, 1.2], [90.4, -81.3, 1.3], [-81.6, -78.1, 1.2], [87.1, -77.3, 1.2], [-77.2, -74.1, 1.2], [-63.3, -72.1, 2.0], [-69.9, -70.9, 2.9], [-83.6, -72.6, 1.2], [-0.6, -65.8, 2.2], [4.0, -65.6, 2.3], [8.5, -65.6, 1.8], [-0.6, -62.7, 1.6], [4.2, -61.4, 1.9], [8.4, -62.6, 2.0], [4.4, -57.4, 1.8], [-58.4, -69.1, 1.4], [-77.6, -67.8, 1.2], [-75.7, -67.7, 1.2], [73.0, -66.1, 1.4], [68.0, -63.2, 1.6], [25.2, -59.6, 1.2], [-18.3, -57.2, 2.0], [6.4, -57.5, 1.2], [8.2, -56.2, 1.2], [5.7, -54.2, 1.2], [32.0, -50.1, 1.8], [63.4, -50.1, 1.4], [3.1, -47.6, 2.2], [31.0, -44.5, 1.7], [11.4, -41.6, 1.2], [17.9, -39.7, 1.2], [29.6, -38.0, 1.7], [17.3, -33.8, 1.2], [28.2, -32.9, 1.7], [-16.7, -32.7, 1.2], [-9.3, -32.3, 1.5], [29.5, -30.6, 1.2], [-2.0, -21.3, 1.5], [26.0, -21.2, 1.2], [4.4, -19.9, 1.2], [56.9, -13.6, 3.2], [-3.6, -13.1, 1.2], [55.9, -1.3, 1.5], [52.2, 8.7, 1.9], [47.8, 17.7, 1.7], [47.9, 21.7, 1.6], [43.3, 24.7, 1.8], [44.6, 28.7, 1.7], [39.9, 34.3, 1.5], [35.5, 38.0, 2.2], [40.4, 37.4, 2.0], [43.7, 37.9, 1.6], [35.7, 41.9, 2.2], [39.3, 42.3, 2.3], [43.6, 41.2, 2.3], [48.3, 42.2, 2.1], [35.4, 45.8, 2.0], [39.7, 46.1, 2.1], [43.2, 45.4, 1.9], [47.4, 46.6, 2.1], [53.0, 46.2, 2.1], [35.8, 50.4, 1.7], [30.8, 53.8, 1.5], [26.7, 5.3, 1.2], [34.2, 10.8, 2.2], [22.5, 11.8, 1.2], [19.6, 25.1, 1.5], [31.1, 28.2, 1.3], [4.5, 29.1, 1.2], [5.5, 31.5, 1.2], [24.0, 34.2, 1.2], [80.2, 39.2, 1.2], [84.8, 41.1, 2.0], [88.5, 44.2, 2.0], [93.0, 44.0, 2.3], [89.9, 48.5, 2.1], [94.1, 48.8, 2.3], [88.8, 53.4, 2.1], [92.7, 52.4, 1.6], [89.2, 57.4, 1.6], [89.8, 61.7, 2.0], [61.4, 40.9, 1.7], [65.0, 41.4, 2.0], [60.4, 45.2, 2.0], [65.0, 45.9, 1.8], [69.3, 46.0, 2.0], [77.0, 44.5, 2.2], [81.6, 45.7, 1.7], [60.3, 50.0, 1.7], [65.5, 50.1, 1.8], [68.4, 49.7, 2.1], [73.7, 48.8, 1.8], [76.8, 49.8, 2.2], [81.5, 48.8, 2.0], [54.4, 42.8, 1.4], [20.2, 42.0, 1.2], [56.4, 47.3, 1.4], [-63.3, 48.7, 1.2], [-60.0, 50.1, 1.2], [45.0, 53.3, 1.5], [45.5, 56.3, 1.9], [48.6, 56.4, 2.2], [52.9, 56.7, 1.7], [57.3, 57.5, 2.1], [56.7, 60.5, 1.6], [49.2, 64.4, 2.3], [53.2, 65.4, 2.2], [44.9, 69.5, 1.7], [49.0, 69.1, 1.6], [53.6, 69.7, 1.7], [39.9, 51.9, 1.2], [72.6, 53.2, 1.2], [-57.5, 52.8, 1.2], [64.9, 53.4, 1.3], [-54.6, 54.0, 1.2], [68.9, 54.3, 1.4], [78.3, 54.4, 1.2], [84.6, 54.8, 1.2], [23.2, 61.6, 1.5], [15.6, 69.1, 1.7], [19.1, 69.7, 1.8], [22.2, 56.1, 1.2], [75.1, 58.2, 3.0], [92.1, 57.8, 1.5], [65.3, 58.4, 1.9], [-50.9, 57.1, 1.2], [11.1, 60.1, 1.2], [0.9, 62.3, 2.4], [36.6, 62.7, 1.8], [67.0, 63.6, 1.8], [71.3, 64.2, 1.7], [76.0, 68.5, 1.9], [7.6, 64.4, 1.3], [-40.3, 64.2, 1.2], [60.7, 65.4, 1.7], [-0.3, 66.7, 1.7], [79.6, 66.2, 1.2], [42.8, 66.9, 1.2], [82.0, 67.5, 1.2], [39.6, 69.9, 1.6], [84.7, 70.7, 1.2], [63.9, 72.3, 1.7], [43.3, 76.4, 3.1], [27.7, 74.9, 1.2], [85.9, 74.9, 1.9], [70.6, 74.7, 2.1], [71.5, 78.7, 1.9], [75.9, 79.1, 1.8], [12.8, 74.9, 1.2], [59.3, 83.6, 1.7], [64.4, 88.1, 1.9], [68.2, 88.6, 2.3], [68.1, 92.0, 2.2], [63.9, 96.8, 2.1], [67.9, 95.8, 2.0], [72.5, 96.8, 1.6], [63.5, 100.4, 1.8], [67.2, 101.0, 2.0], [71.4, 100.2, 1.9], [50.8, 77.3, 1.7], [8.5, 78.9, 2.1], [11.7, 77.5, 1.9], [15.9, 78.6, 1.6], [3.9, 82.6, 2.2], [8.1, 81.9, 2.3], [12.6, 82.6, 2.2], [16.4, 82.8, 1.8], [54.1, 83.0, 2.0], [7.6, 86.4, 2.2], [12.1, 85.9, 2.3], [15.9, 87.2, 1.9], [20.3, 86.3, 1.9], [25.2, 85.9, 2.1], [29.1, 86.2, 2.2], [32.9, 86.2, 1.6], [49.7, 86.6, 2.1], [53.6, 86.4, 2.2], [58.4, 86.3, 1.8], [7.8, 91.2, 2.0], [12.1, 90.7, 2.3], [16.2, 90.9, 1.6], [20.4, 91.2, 2.3], [25.4, 91.2, 2.2], [33.0, 90.2, 2.0], [36.6, 91.4, 2.1], [41.9, 90.8, 2.2], [44.8, 91.4, 2.3], [50.2, 91.2, 2.3], [53.7, 90.8, 2.2], [16.2, 95.0, 1.6], [20.6, 94.5, 2.0], [33.3, 94.6, 2.1], [37.1, 95.1, 2.3], [41.8, 95.5, 2.3], [44.8, 95.4, 2.3], [48.9, 94.4, 2.3], [53.3, 95.3, 2.2], [8.2, 99.0, 2.2], [12.8, 99.2, 2.2], [16.3, 98.9, 2.2], [20.2, 99.5, 1.8], [24.3, 98.5, 2.0], [28.7, 98.5, 1.6], [32.7, 99.3, 2.2], [37.4, 98.9, 2.0], [41.8, 99.5, 2.1], [45.0, 99.2, 2.3], [49.4, 98.8, 2.3], [53.3, 99.2, 1.7], [53.1, 78.8, 1.2], [26.3, 79.1, 1.2], [18.5, 81.8, 1.2], [66.5, 82.3, 1.2], [-72.7, 85.9, 1.4], [92.2, 87.8, 1.7], [85.5, 87.7, 1.5], [76.3, 86.9, 1.2], [79.8, 89.4, 1.5], [74.3, 90.3, 1.2], [2.9, 90.4, 1.2], [28.8, 91.7, 1.2], [60.6, 91.5, 1.2], [-70.5, 94.2, 1.2], [79.1, 95.3, 1.3], [27.2, 94.7, 1.2], [85.7, 96.4, 1.2], [83.6, 96.3, 1.2], [92.4, 97.5, 1.2], [87.6, 96.8, 1.2], [58.6, 98.5, 1.2], [-72.2, 98.2, 1.2], [83.1, 98.4, 1.2], [-78.6, 98.6, 1.2], [-22.2, 98.5, 1.2], [-24.99, -56.88, 2.54], [-39.04, -47.25, 2.8], [-43.66, -45.65, 2.9], [-66.34, -43.7, 4.58], [-63.76, -36.43, 4.69], [-30.6, -37.0, 2.29], [-45.41, -37.96, 1.89], [-35.9, -36.78, 2.8], [-50.66, -35.59, 2.79], [-69.89, -28.93, 2.7], [-66.65, -26.83, 2.7], [-31.96, -28.33, 3.46], [-46.96, -26.02, 3.27], [-40.86, -25.51, 2.44], [-61.72, -25.25, 1.03], [-63.48, -20.25, 1.11], [-41.84, -17.26, 1.0], [-66.85, -16.81, 1.08], [-60.96, -16.03, 1.07], [-47.63, -12.06, 1.75], [-64.87, -11.11, 1.82], [-54.42, -7.53, 1.47], [-51.38, -2.63, 1.72], [-56.62, 0.5, 1.5], [-51.52, 7.29, 2.58], [-55.58, 10.75, 1.61], [-60.35, 13.11, 1.55], [-57.13, 17.52, 1.86], [-62.39, 19.65, 1.52], [-59.64, 24.72, 1.55], [-64.52, 26.57, 1.0], [-61.35, 31.79, 1.77], [-70.31, 43.38, 1.58], [-65.38, 45.51, 1.37]];
 const HEDGE=[[-61.18, -11.45, 0.75], [-60.68, -10.33, 1.31], [-60.12, -9.21, 1.74], [-60.37, -8.09, 1.74], [-60.88, -6.97, 1.74], [-61.18, -5.85, 1.74], [-61.68, -4.73, 1.74], [-63.05, -3.61, 1.56], [-63.36, -2.49, 1.62], [-62.74, -1.37, 1.74], [-62.53, -0.25, 1.74], [-63.34, 0.88, 1.74], [-63.46, 2.0, 1.74], [-64.6, 3.12, 1.37], [-64.8, 4.24, 1.74], [-63.67, 5.36, 1.74], [-63.33, 6.48, 1.74], [-63.03, 7.6, 1.74], [-63.77, 8.72, 1.74], [-64.84, 9.84, 1.74], [-65.95, 10.96, 1.74], [-66.35, 12.08, 1.49], [-67.01, 13.2, 1.24], [-67.65, 14.32, 1.56], [-66.88, 15.44, 1.74], [-66.43, 16.56, 1.74], [-66.85, 17.68, 1.74], [-67.84, 18.8, 1.49], [-68.53, 19.92, 1.06], [-68.78, 21.04, 1.74], [-68.83, 22.16, 1.74], [-68.47, 23.28, 1.74], [-69.25, 24.41, 1.74], [-69.65, 25.53, 1.31], [-69.96, 26.65, 0.87], [-70.77, 27.77, 1.06], [-70.03, 28.89, 1.68], [-69.96, 30.01, 1.74], [-71.58, 31.13, 1.12], [-70.95, 32.25, 1.62], [-70.7, 33.37, 1.74], [-71.29, 34.49, 1.74], [-72.14, 35.61, 1.68], [-72.82, 36.73, 0.75], [-72.7, 37.85, 0.75]];
 const EXT={"x0": -129.78, "x1": 93.18, "z0": -99.6, "z1": 106.01};
@@ -209,8 +209,8 @@ const $=s=>document.querySelector(s);
 const store={get(k,d){try{const v=localStorage.getItem('mr3d_'+k);return v?JSON.parse(v):d}catch(e){return d}},
              set(k,v){try{localStorage.setItem('mr3d_'+k,JSON.stringify(v))}catch(e){}}};
 
-const COL={cocktail:'#E9B07F',welcome:'#F4D4D8',cer:'#9CB7D4',dinner:'#C98E5A',tent:'#FDF8F1',kitchen:'#C8D7A9',parking:'#cfc4b2'};
-const NAMES={cocktail:'Drinks · pool terrace',welcome:'Welcome · karavai',cer1:'Ceremony 1',cer2:'Ceremony 2',cer3:'Ceremony 3',
+const COL={toilets:'#bfc7cf',cocktail:'#E9B07F',welcome:'#F4D4D8',cer:'#9CB7D4',dinner:'#C98E5A',tent:'#FDF8F1',kitchen:'#C8D7A9',parking:'#cfc4b2'};
+const NAMES={toilets:'Toilets',cocktail:'Drinks · pool terrace',welcome:'Welcome · karavai',cer1:'Ceremony 1',cer2:'Ceremony 2',cer3:'Ceremony 3',
   kitchen:'Catering kitchen',dinner:'Dinner under the trees',tent:'Party tent',parking:'Parking & shuttle'};
 
 // ---------- state ----------
@@ -681,7 +681,7 @@ function applyLayout(key){const Z=ZONES[key],L=layout[key]||{},z=zones[key];
   const x=L.x??Z.x, zz=L.z??Z.z; z.group.position.set(x,H(x,zz),zz); z.group.rotation.y=L.r??Z.r??0; conform(key); settle(key)}
 
 makeZone('parking',COL.parking); makeZone('welcome',COL.welcome); makeZone('cocktail',COL.cocktail);
-makeZone('kitchen',COL.kitchen); makeZone('dinner',COL.dinner); makeZone('tent',COL.tent);
+makeZone('kitchen',COL.kitchen); makeZone('dinner',COL.dinner); makeZone('tent',COL.tent); makeZone('toilets',COL.toilets);
 ['cer1','cer2','cer3'].forEach(k=>makeZone(k,COL.cer));
 
 function clear(g){while(g.children.length){const c=g.children.pop(); c.traverse&&c.traverse(o=>{o.geometry&&o.geometry.dispose()})}}
@@ -698,12 +698,47 @@ let carCount=0, dinL=30;
   const bus=box(2.5,3.1,11,'#FDF8F1',z.w/2-3,0,0,{roughness:.6}); g.add(bus);
 })();
 
+// ---------- rented furniture & styling pieces, built once and placed per zone ----------
+function grp(layer,x,z,rot){const g=new THREE.Group(); g.position.set(x||0,0,z||0); g.rotation.y=rot||0; g.userData.layer=layer; return g}
+function rentTable(layer,w,d,x,z,rot,cloth){const g=grp(layer,x,z,rot), T=TAG; TAG=layer;
+  g.add(box(w,.04,d,cloth===false?'#8a6d4e':'#f4efe4',0,.72,0));
+  if(cloth!==false){[-1,1].forEach(sd=>g.add(box(w,.55,.012,'#efe8da',0,.2,sd*d/2))); [-1,1].forEach(sd=>g.add(box(.012,.55,d,'#efe8da',sd*w/2,.2,0)))}
+  else [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>g.add(box(.05,.72,.05,'#6b5643',a*(w/2-.08),0,b*(d/2-.08))));
+  TAG=T; return g}
+function roundTable(layer,r,x,z){const g=grp(layer,x,z), T=TAG; TAG=layer; g.add(cyl(r,.03,'#f4efe4',0,0,.72));
+  const sk=new THREE.Mesh(new THREE.CylinderGeometry(r,r+.02,.72,20,1,true),mat('#efe8da',{side:THREE.DoubleSide})); sk.position.y=.36; g.add(sk); TAG=T; return g}
+function easel(layer,w,h,x,z,rot,face){const g=grp(layer,x,z,rot), T=TAG; TAG=layer;
+  [-1,1].forEach(sd=>{const l=box(.04,h+.9,.04,'#7a5e43',sd*w/2.6,0,.12); l.rotation.x=-.12; g.add(l)}); const b=box(.04,h+.6,.04,'#7a5e43',0,0,-.3); b.rotation.x=.3; g.add(b);
+  g.add(box(w+.08,h+.08,.04,'#c9b48f',0,.75,0)); g.add(box(w,h,.05,face||'#FDF8F1',0,.79,.01)); TAG=T; return g}
+function urn(x,z,big){const g=grp('decor',x,z), s=big?1.25:1, T=TAG; TAG='decor';
+  g.add(cyl(.18*s,.12*s,'#d8ccb4',0,0)); const bowl=new THREE.Mesh(new THREE.CylinderGeometry(.34*s,.16*s,.42*s,16),mat('#d8ccb4')); bowl.position.y=.33*s; bowl.castShadow=true; g.add(bowl);
+  TAG=T; meadow(g,0,0,.9*s,.7*s,26); g.children[g.children.length-1].position.y=.5*s; return g}
+function pottedOlive(x,z){const g=grp('decor',x,z), T=TAG; TAG='decor';
+  const pot=new THREE.Mesh(new THREE.CylinderGeometry(.38,.28,.6,14),mat('#b8704a')); pot.position.y=.3; pot.castShadow=true; g.add(pot);
+  g.add(box(.08,1.2,.08,'#857c6a',0,.6,0)); const c=new THREE.Mesh(new THREE.IcosahedronGeometry(.7,1),mat('#8b9a76',{flatShading:true})); c.position.y=2.0; c.scale.y=.85; c.castShadow=true; g.add(c); TAG=T; return g}
+function bench(layer,len,x,z,rot){const g=grp(layer,x,z,rot), T=TAG; TAG=layer; g.add(box(len,.06,.42,'#8a6d4e',0,.42,0)); g.add(box(len,.38,.05,'#8a6d4e',0,.55,.2));
+  [-1,1].forEach(sd=>g.add(box(.06,.42,.38,'#6b5643',sd*(len/2-.1),0,0))); TAG=T; return g}
+function seat(layer,x,z,rot,col){const g=grp(layer,x,z,rot), T=TAG; TAG=layer; g.add(box(.44,.05,.42,col||'#a8835c',0,.45,0)); g.add(box(.44,.45,.04,col||'#a8835c',0,.5,.2));
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>g.add(box(.035,.45,.035,col||'#a8835c',a*.19,0,b*.18))); TAG=T; return g}
+function dispenser(g,x,z,y,col){const gl=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,.42,14),new THREE.MeshStandardMaterial({color:C(col),roughness:.1,transparent:true,opacity:.7})); gl.position.set(x,y+.25,z); gl.userData.layer=g.userData.layer; g.add(gl)}
+function cabin(x,z,wide){const g=grp('structures',x,z), T=TAG; TAG='structures'; const w=wide?1.8:1.2;
+  g.add(box(w,2.3,1.3,'#e9e5dc',0,0,0)); g.add(box(w+.1,.08,1.4,'#c9c2b3',0,2.3,0)); g.add(box(w*.6,1.9,.03,'#b9b2a3',0,.1,.66)); TAG=T; return g}
+
 // welcome: karavai table, sign, lanterns
 (function(){const g=zones.welcome.content; TAG='seating';
   g.add(box(2.2,.76,.9,'#EDE3D1',0,0,-2)); TAG='decor'; g.add(cyl(.32,.12,'#d39b5e',0,-2,.76)); g.add(cyl(.12,.42,'#b9a07a',.8,-2,.76));
   blooms(g,-.7,-2,.8,10,.6);
   const sign=box(1.1,1.5,.06,'#FDF8F1',-4,0.4,1); sign.rotation.y=.35; g.add(sign); g.add(box(.08,.5,.08,'#5E4632',-4,0,1));
   TAG='lighting'; [[-6,-5],[6,-5],[-6,4],[6,4]].forEach(p=>g.add(cyl(.18,.5,'#3F5E78',p[0],p[1]))); TAG=null;
+  // a full welcome: soft-drinks table, table plan, guest book, urns, olives in pots, benches, fans and parasols for the sun
+  const rug=box(3.4,.02,2.4,'#d9c7a8',0,0,-2); rug.userData.layer='decor'; g.add(rug);
+  const wd=rentTable('seating',2.4,.8,4.6,-3,0); g.add(wd); ['#f3d9a8','#dfe8c8','#f4d4d8'].forEach((c,i)=>dispenser(wd,-.7+i*.7,-.1,.74,c));
+  g.add(easel('decor',1.1,1.6,-6.6,-1,.5,'#f4efe4'));            // table plan
+  const gb=roundTable('seating',.45,-3.4,-5.2); g.add(gb); TAG='decor'; gb.add(box(.3,.02,.22,'#3F5E78',0,.74,0)); gb.add(box(.12,.2,.08,'#c9b48f',.22,.74,.05)); TAG=null;   // guest book
+  g.add(urn(-1.7,-3.4,true)); g.add(urn(1.7,-3.4,true));
+  g.add(pottedOlive(-8.2,4.6)); g.add(pottedOlive(8.2,4.6));
+  g.add(bench('seating',1.8,-5,4.8,Math.PI)); g.add(bench('seating',1.8,5,4.8,Math.PI));
+  const fans=rentTable('decor',.9,.6,7.2,.6,-.4,false); g.add(fans); TAG='decor'; fans.add(box(.6,.22,.4,'#c9a36a',0,.74,0)); for(let i=0;i<5;i++){const p=box(.02,.9,.02,'#eef0f2',-.25+i*.12,.74,.25); p.rotation.z=(i-2)*.08; fans.add(p)} TAG=null;
 })();
 
 // cocktail: one bar stand, three food stands and high tables, laid out around the pool
@@ -730,6 +765,7 @@ function addProp(id,name,obj,x,z,r){const L=(layout.props||{})[id]||{}; obj.user
   const hit=new THREE.Mesh(new THREE.BoxGeometry(Math.max(sz.x,1),Math.max(sz.y,1.2),Math.max(sz.z,1)),new THREE.MeshBasicMaterial({visible:false}));
   hit.position.copy(bb.getCenter(new THREE.Vector3())); hit.userData.propHit=id; obj.add(hit); obj.userData.hit=hit;
   obj.position.set(L.x??x,0,L.z??z); obj.rotation.y=L.r??r; zones.cocktail.content.add(obj); props[id]=obj; PROP_NAMES[id]=name}
+const lanternMat=new THREE.MeshStandardMaterial({color:C('#fff3d6'),emissive:C('#ffc56b'),emissiveIntensity:0});
 const festoonMat=new THREE.MeshStandardMaterial({color:C('#fff6dd'),emissive:C('#ffcf7a'),emissiveIntensity:0});
 const parasolCanopyM=new THREE.MeshStandardMaterial({color:C('#f3ede0'),roughness:.95,side:THREE.DoubleSide});
 function highTable(){TAG='seating'; const t=new THREE.Group(); t.add(cyl(.05,1.05,'#5E4632',0,0)); t.add(cyl(.38,.04,'#f4efe4',0,0,1.05)); t.add(cyl(.25,.03,'#5E4632',0,0));
@@ -753,6 +789,12 @@ function loungeSet(){const g=new THREE.Group(); g.userData.layer='lounge'; const
   addProp('food2','Food stand 2',mk('food'),...P(-35.4,-64.5),-Math.PI/2);
   addProp('food3','Food stand 3',mk('food'),...P(-40.5,-45.6),Math.PI);
   addProp('lounge2','Lounge set',loungeSet(),...P(-45.2,-46.0),Math.PI/2);
+  // screen-printing station: guests print their own T-shirts and tote bags
+  const sp=new THREE.Group(); sp.userData.layer='stands'; const spt=rentTable('stands',2.4,.9,0,0,0,false); sp.add(spt); TAG='stands';
+  sp.add(box(.6,.06,.5,'#3a3530',-.5,.76,0)); sp.add(box(.55,.02,.45,'#d9e3ea',-.5,.84,0)); sp.add(box(.5,.04,.4,'#2f3236',.5,.76,0));
+  sp.add(box(1.6,.04,.04,'#7a5e43',0,1.6,-.7)); [-.8,.8].forEach(x=>sp.add(box(.04,1.6,.04,'#7a5e43',x,0,-.7)));
+  ['#FDF8F1','#EDE3D1','#C8D7A9','#9CB7D4','#FDF8F1'].forEach((c,i)=>sp.add(box(.28,.4,.02,c,-.6+i*.3,1.18,-.7))); TAG=null;
+  addProp('print','Screen-printing station',sp,...P(-50.0,-48.6),Math.PI/2);
   [[-44.5,-64.8],[-41.5,-64.8],[-44.4,-60.0],[-34.6,-60.0],[-34.6,-56.5],[-44.6,-50.4],[-40.6,-50.6],[-41.6,-48.6],[-37.4,-47.4]].forEach((p,i)=>addProp('ht'+i,'High table',highTable(),...P(p[0],p[1]),0));
   [[-43.0,-62.4],[-40.8,-49.0],[-34.6,-58.25]].forEach((p,i)=>addProp('pa'+i,'Parasol',parasol(0,0),...P(p[0],p[1]),0));
   // festoon strings from the loggia across the terrace to poles at the south end
@@ -763,13 +805,19 @@ function loungeSet(){const g=new THREE.Group(); g.userData.layer='lounge'; const
   bm.position.y=(TERRACE?TERRACE.y:0)-zones.cocktail.group.position.y; bm.userData.fixed=true; c.add(bm);
 })();
 
+// toilets: three cabins and an accessible one, a hand-wash station and a lantern, just off the dinner-to-tent path
+(function(){const g=zones.toilets.content; [-2.4,-1.1,.2].forEach(x=>g.add(cabin(x,0))); g.add(cabin(1.9,0,true));
+  const hw=rentTable('structures',1.2,.5,0,1.8,0,false); g.add(hw); TAG='structures'; hw.add(box(.9,.12,.35,'#d9dee2',0,.74,0)); TAG=null;
+  const lp=grp('lighting',-3.6,1.2); TAG='lighting'; lp.add(cyl(.03,1.6,'#3a3530',0,0)); TAG=null; const lb=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,.24,8),lanternMat); lb.position.y=1.7; lb.userData.layer='lighting'; lp.add(lb); g.add(lp);
+  TAG='structures'; const gen=box(2.2,1.4,1.1,'#5d6a5a',-82,0,-16); gen.userData.layer='structures'; scene.add(gen); TAG=null; gen.position.y=H(-82,-16)+.6;
+})();
 // kitchen: catering marquee
 (function(){const g=zones.kitchen.content;
   const kg=gable(-3,-4,3,6,2.6,3.9,'z','#f6f3ec','#ffffff'); kg.position.y=0; kg.userData.layer='structures'; g.add(kg);
   TAG='structures'; g.add(box(2.2,1.9,4,'#d7dbe0',0,0,-6.5)); TAG=null;
 })();
 
-['parking','welcome','cocktail','kitchen'].forEach(settle);
+['parking','welcome','cocktail','kitchen','toilets'].forEach(settle);
 // ceremony
 function buildCeremony(key,active){
   const z=zones[key], g=z.content; clear(g);
@@ -800,6 +848,14 @@ function buildCeremony(key,active){
   else parasolCount=0;
   const rs=-z.d/2+2.4, rl=lastRow+1.5-rs, nseg=Math.ceil(rl/1.5); aisleLen=rl;
   TAG='decor'; for(let k=0;k<nseg;k++) g.add(box(1.1,.03,rl/nseg+.02,'#EDE3D1',0,.02,rs+(k+.5)*rl/nseg)); TAG=null;
+  // ceremony extras: signing table, a string duo, urns at the start of the aisle, welcome sign, fans and programmes, a water station
+  const back=lastRow+2.2;
+  const st=rentTable('seating',1.4,.7,3.7,ax+.4,0); g.add(st); g.add(seat('seating',3.4,ax-.15,0,'#FDF8F1')); g.add(seat('seating',4.0,ax-.15,0,'#FDF8F1'));
+  [-4.2,-3.4].forEach(x=>{g.add(seat('seating',x,ax+.3,Math.PI,'#FDF8F1')); const ms=grp('decor',x,ax+1.0); TAG='decor'; ms.add(box(.02,1.1,.02,'#2f3236',0,0,0)); ms.add(box(.45,.3,.02,'#2f3236',0,1.05,0)); TAG=null; g.add(ms)});
+  g.add(urn(-1.25,back-.6)); g.add(urn(1.25,back-.6));
+  g.add(easel('decor',.9,1.2,-2.2,back+.4,0,'#f4efe4'));
+  const pf=rentTable('seating',1.2,.6,2.4,back+.4,0); g.add(pf); TAG='decor'; pf.add(box(.5,.12,.35,'#c9a36a',-.25,.74,0)); pf.add(box(.4,.04,.3,'#FDF8F1',.3,.74,0)); TAG=null;
+  const ws=rentTable('seating',1.6,.6,-4.6,back+.6,0); g.add(ws); dispenser(ws,-.35,0,.74,'#dfeef2'); dispenser(ws,.35,0,.74,'#e8f2dc');
   let lo=1e9,hi=-1e9; list.forEach(c=>{const h=hl(key,c[0],c[1]); lo=Math.min(lo,h); hi=Math.max(hi,h)});
   // arch
   focal(g,ax,'meadow');
@@ -807,7 +863,7 @@ function buildCeremony(key,active){
   return {spill,rows:rowsN,drop:hi-lo,arc}
 }
 // market parasol: 3 m cream canopy on a wooden pole
-let parasolCount=0, aisleLen=12;
+let parasolCount=0, aisleLen=12, tentFloorY=0;
 function parasol(x,z){const g=new THREE.Group(); g.position.set(x,0,z); g.userData.layer='shade';
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(.03,.035,2.75,8),mat('#7a5e43')); pole.position.y=1.375; pole.castShadow=true; g.add(pole);
   const can=new THREE.Mesh(new THREE.ConeGeometry(1.5,.55,8,2,true),parasolCanopyM); can.position.y=2.6; can.castShadow=true; g.add(can);
@@ -848,6 +904,8 @@ function buildDinner(){
     TAG='lighting'; g.add(cyl(.05,3.5,'#5E4632',x,-len/2-.4)); g.add(cyl(.05,3.5,'#5E4632',x,len/2+.4)); TAG=null;
   });
   g.add(chairs(list,'#a8835c','dinner'));
+  // two service stations on the open (east) side, one near each end, for plated service
+  [-1,1].forEach(sd=>g.add(rentTable('seating',2.4,.7,3.4,sd*(L/2-3),0)));
   const plates=new THREE.InstancedMesh(new THREE.CylinderGeometry(.14,.12,.015,18),mat('#fbf9f4',{roughness:.3}),list.length),
         glass=new THREE.InstancedMesh(new THREE.CylinderGeometry(.035,.03,.15,10),new THREE.MeshStandardMaterial({color:C('#e8f0f2'),roughness:.05,transparent:true,opacity:.45}),list.length), m5=new THREE.Matrix4();
   list.forEach((c,i)=>{const px=c[0]+(c[0]>c[0]-0?0:0), tx=c[0]-Math.sign(Math.sin(c[2]))*.43*-1; const sx=c[0]+(c[2]>0?-.48:.48); const y=hl('dinner',sx,c[1])+.745;
@@ -861,10 +919,16 @@ function buildTent(){
   const [W,D]=S.tent.split('x').map(Number), eave=3, ridge=3+Math.min(W,D)*.18;
   let lo=1e9,hi=-1e9; for(let i=0;i<=8;i++) for(let j=0;j<=8;j++){const h=hl('tent',-W/2+W*i/8,-D/2+D*j/8); lo=Math.min(lo,h); hi=Math.max(hi,h)}
   TAG='structures'; const top=hi+.15, floor=box(W,top-lo+.3,D,'#a98663',0,lo-.3,0,{roughness:.8}); g.add(floor);
-  const outerG=g; g=new THREE.Group(); g.position.y=top-.12; outerG.add(g);
-  const df=box(Math.min(8,W*.4),.02,Math.min(8,D*.5),'#2b2d30',-W*.15,.12,0,{roughness:.3}); g.add(df);
+  const outerG=g; g=new THREE.Group(); g.position.y=top-.12; outerG.add(g); tentFloorY=z.group.position.y+top;
+  const df=box(Math.min(8,W*.4),.02,Math.min(8,D*.5),'#d8c3a0',-W*.15,.12,0,{roughness:.6}); g.add(df);
   TAG='stands'; g.add(box(4,1.1,.8,'#5E4632',W/2-3,.12,-D/2+1.6)); g.add(box(2,1,1,'#2b2d30',-W*.15-Math.min(8,W*.4)/2-1.2,.12,0));
   TAG='lounge'; for(let i=0;i<4;i++){g.add(box(2,.45,.85,'#EDE3D1',W/2-2.2,.12,-D/2+4.5+i*1.6))} TAG=null;
+  // tent extras: high tables round the dance floor, cake table, gifts and cards by the entrance, a photo corner
+  const dfx=-W*.15, hw=Math.min(8,W*.4)/2+1.6, hd=Math.min(8,D*.5)/2+1.4;
+  [[dfx-hw,-hd],[dfx-hw,hd],[dfx+hw,-hd],[dfx+hw,hd],[dfx,-hd-1],[dfx,hd+1]].forEach(([x,z])=>{const t=grp('seating',x,z); t.position.y=.12; TAG='seating'; t.add(cyl(.05,1.05,'#5E4632',0,0)); t.add(cyl(.38,.04,'#f4efe4',0,0,1.05)); TAG=null; g.add(t)});
+  const cake=roundTable('seating',.55,W/2-3.5,D/2-2.2); cake.position.y=.12; g.add(cake); TAG='decor'; [.32,.24,.16].forEach((r,i)=>cake.add(cyl(r,.16,'#FDF8F1',0,0,.75+i*.16))); TAG=null;
+  const gift=rentTable('seating',1.6,.7,-W/2+1.6,-D/2+2.2,Math.PI/2); gift.position.y=.12; g.add(gift);
+  const pc=grp('decor',-W/2+1.8,D/2-1.6,0); pc.position.y=.12; TAG='decor'; pc.add(box(2.6,2.2,.06,'#EDE3D1',0,0,.6)); pc.add(box(2.8,.08,.1,'#7a5e43',0,2.2,.6)); TAG=null; meadow(pc,-1.1,.4,.8,.5,20); meadow(pc,1.1,.4,.8,.5,20); g.add(pc);
   const poleM=mat('#e8e4dc'); const step=5;
   for(let x=-W/2;x<=W/2+.01;x+=W/Math.round(W/step)) for(const zz of [-D/2,D/2]){const p=new THREE.Mesh(new THREE.BoxGeometry(.12,eave,.12),poleM);p.position.set(x,eave/2,zz);p.castShadow=true;p.userData.layer='structures';g.add(p)}
   const half=D/2+.2,h=ridge-eave,shape=new THREE.Shape(); shape.moveTo(-half,0);shape.lineTo(half,0);shape.lineTo(0,h);shape.closePath();
@@ -898,7 +962,6 @@ const PATHS_DEFAULT=[
 let PATHS=PATHS_DEFAULT.map(p=>{const saved=(layout.paths||{})[p.id]; return Object.assign({},p,{pts:saved&&saved.length===p.pts.length?saved.map((q,i)=>typeof p.pts[i]==='string'?p.pts[i]:q):p.pts.slice()})});
 const pathGroup=new THREE.Group(); scene.add(pathGroup);
 const pathHandles=new THREE.Group(); pathHandles.visible=false; scene.add(pathHandles);
-const lanternMat=new THREE.MeshStandardMaterial({color:C('#fff3d6'),emissive:C('#ffc56b'),emissiveIntensity:0});
 function anchorPt(a){
   if(JUNC[a]) return JUNC[a];
   if(a==='cerBack'){const z=zones[S.cer]; z.group.updateMatrixWorld(); const v=new THREE.Vector3(0,0,z.d/2+1.2).applyMatrix4(z.group.matrixWorld); return [v.x,v.z]}
@@ -944,14 +1007,16 @@ function renderRentals(){
   const g=S.guests, [TW,TD]=S.tent.split('x').map(Number), dl=dinL||33, tables=Math.ceil(dl/2.4);
   const guestPath=['arrive','toCer','toDrinks','toDinner','toTent'].reduce((a,k)=>a+(pathLengths[k]||0),0), servPath=pathLengths.service||0;
   const nProps=pre=>Object.keys(props).filter(k=>k.startsWith(pre)).length;
+  const htDrinks=nProps('ht'), lanternsAll=lanternCount+4+1;
   const groups=[
-    ['Ceremony',[['Ceremony chairs (white)',g],['Market parasols, 3 m',parasolCount],['Aisle runner',Math.ceil(aisleLen)+' m'],['Flower meadow arrangements (florist)',2]]],
-    ['Welcome',[['Karavai table, 2.2 m, with linen',1],['Welcome sign',1],['Lanterns',4]]],
-    ['Drinks',[['Bar stand with back bar',nProps('bar')],['Food stands',nProps('food')],['High tables with stretch covers',nProps('ht')],['Lounge sets (sofa, 2 armchairs, coffee table, rug)',nProps('lounge')],['Market parasols, 3 m',nProps('pa')],['Festoon lights over the terrace',3*18+' m, 3 poles']]],
-    ['Dinner',[['Trestle tables, 2.4 m',tables],['Dining chairs (wood)',g],['Tablecloths for a '+Math.round(dl)+' m table',Math.ceil(dl/3)+' × 3 m'],['Napkins',g],['Candle holders',Math.ceil(g/4)],['Festoon lights over the table',Math.round(dl+4)+' m, 2 poles']]],
-    ['Party tent',[['Tent '+TW+' × '+TD+' m with sides',1],['Raised level floor',TW*TD+' m²'],['Dance floor',Math.round(Math.min(8,TW*.4))+' × '+Math.round(Math.min(8,TD*.5))+' m'],['Bar counter',1],['DJ booth',1],['Lounge sofas',4],['Festoon lights inside',2*TW+' m']]],
-    ['Paths & lighting',[['Matting or gravel for guest paths',Math.round(guestPath*1.6)+' m²'],['Service path surface',Math.round(servPath*2.4)+' m²'],['Path lanterns',lanternCount],['Uplights for the trees by dinner','≈ 8']]],
-    ['Back of house',[['Catering marquee 6 × 10 m',1],['Generator and cabling','1 set'],['Toilet cabins (incl. 1 accessible)',Math.max(3,Math.ceil(g/35))+' — not placed yet']]]];
+    ['Welcome',[['Karavai table, 2.2 m, with linen and a rug',1],['Welcome soft-drinks table, 2.4 m, with linen',1],['Glass drink dispensers (lemonade, iced tea, water)',3],['Easels: welcome sign and table plan',2],['Round guest-book table',1],['Stone urns with flowers (florist)',2],['Olive trees in terracotta pots',2],['Wooden benches',2],['Basket of fans and paper parasols',1],['Lanterns',4]]],
+    ['Ceremony',[['Ceremony chairs (white)',g],['Market parasols, 3 m',parasolCount],['Aisle runner',Math.ceil(aisleLen)+' m'],['Flower meadow arrangements (florist)',2],['Signing table with linen, and 2 chairs',1],['Musician chairs and music stands (string duo)',2],['Small urns at the start of the aisle (florist)',2],['Easel for the welcome / order-of-day sign',1],['Programme and fan table',1],['Water station with 2 dispensers',1],['Small PA with wireless mic','1 set']]],
+    ['Drinks',[['Bar stand with back bar',nProps('bar')],['Food stands',nProps('food')],['High tables with stretch covers',htDrinks],['Lounge sets (sofa, 2 armchairs, coffee table, rug)',nProps('lounge')],['Market parasols, 3 m',nProps('pa')],['Screen-printing station (table, press, drying rack)',nProps('print')],['Festoon lights over the terrace',3*18+' m, 3 poles']]],
+    ['Dinner',[['Trestle tables, 2.4 m',tables],['Dining chairs (wood crossback)',g],['Tablecloths for a '+Math.round(dl)+' m table',Math.ceil(dl/3)+' × 3 m'],['Napkins',g],['Greenery runner (florist)',Math.round(dl)+' m'],['Candle holders',Math.ceil(g/4)],['Service stations for plated service',2],['Festoon lights over the table',Math.round(dl+4)+' m, 2 poles']]],
+    ['Party tent',[['Tent '+TW+' × '+TD+' m with sides',1],['Raised level floor',TW*TD+' m²'],['Dance floor',Math.round(Math.min(8,TW*.4))+' × '+Math.round(Math.min(8,TD*.5))+' m'],['Bar counter',1],['DJ booth with sound and lights','1 set'],['High tables with stretch covers',6],['Lounge sofas',4],['Round cake table with linen',1],['Gifts and cards table',1],['Photo corner backdrop with flowers',1],['Festoon lights inside',2*TW+' m']]],
+    ['Paths & lighting',[['Matting or gravel for guest paths',Math.round(guestPath*1.6)+' m²'],['Service path surface',Math.round(servPath*2.4)+' m²'],['Lanterns on posts (paths and toilets)',lanternCount+1],['Uplights for the olives by dinner','≈ 8']]],
+    ['Back of house',[['Catering marquee 6 × 10 m',1],['Generator and cabling','1 set'],['Toilet cabins',3],['Accessible toilet cabin',1],['Hand-wash station',1],['Bins and recycling stations','≈ 6']]],
+    ['Totals to check',[['All chairs (ceremony, dinner, signing, musicians)',g*2+4],['All high tables',htDrinks+6],['All tables with linen (excl. dinner)',8]]]];
   const el=document.getElementById('rentals'); if(!el) return;
   el.innerHTML=groups.map(([t,items])=>`<div><h3>${t}</h3><ul>${items.map(([n,v])=>`<li><span>${n}</span><span class="${String(v).includes('not placed')?'todo':''}">${v}</span></li>`).join('')}</ul></div>`).join('');
   rentalText='Mas Rognon, 31 July 2027 — rental list for '+g+' guests\n\n'+groups.map(([t,items])=>t.toUpperCase()+'\n'+items.map(([n,v])=>'- '+n+': '+v).join('\n')).join('\n\n');
@@ -1007,7 +1072,7 @@ function applySun(withEnv){
 const CHIPS=[[930,'Guests arrive','arrival'],[960,'Ceremony','ceremony'],[1005,'Drinks','drinks'],[1170,'Dinner','dinner'],[1200,'Food served','dinner'],[0,'Sunset','overview']];
 CHIPS.forEach(c=>{const b=document.createElement('button'); const t=c[0]||SUNSET-10;
   b.innerHTML='<b>'+fmt(c[0]||SUNSET)+'</b>'+c[1]; b.onclick=()=>{S.time=t; applySun(); go(c[2]); save()}; $('#chips').appendChild(b)});
-const VIEWS={overview:'Overview',top:'From above',photo3:'Ceremony 3, as in your photo',photo1:'Ceremony 1, as in your photo',photoD:'Dinner, as in your photo',arrival:'Arriving guest',ceremony:'From the aisle',drinks:'Courtyard drinks',dinner:'At the table',party:'Tent'};
+const VIEWS={overview:'Overview',top:'From above',photo3:'Ceremony 3, as in your photo',photo1:'Ceremony 1, as in your photo',photoD:'Dinner, as in your photo',welcome:'The welcome',arrival:'Arriving guest',ceremony:'From the aisle',drinks:'Courtyard drinks',dinner:'At the table',party:'Tent'};
 Object.entries(VIEWS).forEach(([k,n])=>{const b=document.createElement('button'); b.textContent=n; b.onclick=()=>go(k); $('#views').appendChild(b)});
 [['Drinks',COL.cocktail],['Welcome',COL.welcome],['Ceremony',COL.cer],['Dinner',COL.dinner],['Party tent','#e8e1d3'],['Catering',COL.kitchen],['Parking',COL.parking],['Guest route','#3F5E78']]
  .forEach(([n,c])=>{const s=document.createElement('span'); s.innerHTML='<span class="dot" style="background:'+c+'"></span>'+n; $('#legend').appendChild(s)});
@@ -1020,13 +1085,14 @@ function go(k){
   if(k==='overview'){pos=new THREE.Vector3(32,72,98);tgt=new THREE.Vector3(-30,0,-14)}
   else if(k==='top'){pos=new THREE.Vector3(-20,230,1);tgt=new THREE.Vector3(-20,0,0)}
   else if(k==='arrival'){pos=world('parking',zones.parking.w/2-6,-1,1.7); tgt=center('welcome').clone().setY(H(center('welcome').x,center('welcome').z)+1.4)}
+  else if(k==='welcome'){pos=world('welcome',-1.5,9.5,1.7); tgt=world('welcome',.3,-3,1.0)}
   else if(k==='photoD'){const sp=v=>new THREE.Vector3(v[0],H(v[0],v[1])+v[2],v[1]); pos=sp([-58.2,36.2,1.6]); tgt=sp([-51.2,8,2.4])}
   else if(k==='photo1'){ if(S.cer!=='cer1'){S.cer='cer1'; rebuild()} const sp=v=>new THREE.Vector3(v[0],H(v[0],v[1])+v[2],v[1]); pos=sp([-2.4,-33.5,1.7]); tgt=sp([1.2,-70,5.5])}
   else if(k==='photo3'){ if(S.cer!=='cer3'){S.cer='cer3'; rebuild()} const sp=v=>new THREE.Vector3(v[0],H(v[0],v[1])+v[2],v[1]); pos=sp([-30.4,-38.8,1.6]); tgt=sp([-29.8,-53,3.6])}
   else if(k==='ceremony'){pos=world(S.cer,0,cz.d/2+3,1.7); tgt=world(S.cer,0,-cz.d/2+1.6,1.4)}
   else if(k==='drinks'){pos=world('cocktail',1.5,8.6,2.6); tgt=world('cocktail',-1.5,-11,1.2)}
   else if(k==='dinner'){pos=world('dinner',2.4,dinL/2+5.5,2.4); tgt=world('dinner',-.2,-dinL/2+3,.9)}
-  else if(k==='party'){pos=world('tent',-zones.tent.w/2-4,zones.tent.d/2+8,2); tgt=center('tent').clone().setY(H(center('tent').x,center('tent').z)+1.2)}
+  else if(k==='party'){const [TW,TD]=S.tent.split('x').map(Number); pos=world('tent',-TW/2+1.2,TD/2-1.5,0); pos.y=tentFloorY+1.65; tgt=world('tent',TW/4,-TD/4,0); tgt.y=tentFloorY+.9; $('#hudView').textContent=VIEWS[k]; tween(pos,tgt); return; tgt=center('tent').clone().setY(H(center('tent').x,center('tent').z)+1.2)}
   $('#hudView').textContent=VIEWS[k];
   tween(pos,tgt)}
 let tw=null;
@@ -1123,7 +1189,7 @@ const endDrag=()=>{if(!drag) return;
   if(drag.path){ if(drag.path.junc){layout.junctions=Object.assign({},JUNC)} else {layout.paths=layout.paths||{}; const p=PATHS.find(q=>q.id===drag.path.id); layout.paths[p.id]=p.pts} drag=null; controls.enabled=true; save(); return}
   if(drag.fence){layout.fence=JSON.parse(JSON.stringify(FENCE)); drag=null; controls.enabled=true; buildPaths(); save(); return}
   if(drag.prop){const o=props[drag.prop]; layout.props=layout.props||{}; layout.props[drag.prop]={x:+o.position.x.toFixed(2),z:+o.position.z.toFixed(2),r:o.rotation.y}; drag=null; controls.enabled=true; save(); return}
-  const g=zones[drag.k].group; layout[drag.k]=Object.assign(layout[drag.k]||{},{x:+g.position.x.toFixed(2),z:+g.position.z.toFixed(2),r:g.rotation.y}); drag=null; controls.enabled=true; ['parking','welcome','cocktail','kitchen'].forEach(settle); rebuild(); save()};
+  const g=zones[drag.k].group; layout[drag.k]=Object.assign(layout[drag.k]||{},{x:+g.position.x.toFixed(2),z:+g.position.z.toFixed(2),r:g.rotation.y}); drag=null; controls.enabled=true; ['parking','welcome','cocktail','kitchen','toilets'].forEach(settle); rebuild(); save()};
 canvas.addEventListener('pointerup',endDrag); canvas.addEventListener('pointercancel',endDrag);
 
 // ---------- loop ----------
