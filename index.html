@@ -807,7 +807,14 @@ function loungeSet(){const g=new THREE.Group(); g.userData.layer='lounge'; const
 
 // toilets: three cabins and an accessible one, a hand-wash station and a lantern, just off the dinner-to-tent path
 (function(){const g=zones.toilets.content; [-2.4,-1.1,.2].forEach(x=>g.add(cabin(x,0))); g.add(cabin(1.9,0,true));
-  const hw=rentTable('structures',1.2,.5,0,1.8,0,false); g.add(hw); TAG='structures'; hw.add(box(.9,.12,.35,'#d9dee2',0,.74,0)); TAG=null;
+  const hw=rentTable('structures',1.2,.5,-1.6,1.8,0,false); g.add(hw); TAG='structures'; hw.add(box(.9,.12,.35,'#d9dee2',0,.74,0)); TAG=null;
+  // a dressed vanity beside the hand-wash station: wooden console with linen, a framed standing mirror, toiletries basket and a little vase
+  const van=rentTable('decor',1.4,.5,.9,1.9,0); g.add(van); TAG='decor';
+  van.add(box(.86,1.16,.05,'#b89b6e',0,.76,-.2)); van.add(box(.74,1.04,.03,'#cfdbe2',0,.82,-.17));          // mirror in a wood frame
+  van.add(box(.42,.14,.24,'#c9a36a',-.42,.74,.05));                                                      // toiletries basket
+  [['#FDF8F1',-.52],['#EDE3D1',-.42],['#C8D7A9',-.32]].forEach(([c,x])=>van.add(cyl(.03,.14,c,x,.05,.86)));  // little bottles
+  van.add(box(.26,.04,.18,'#fbf9f4',.18,.74,.06));                                                        // folded hand towels
+  van.add(cyl(.05,.16,'#e8f0f2',.45,.02,.74)); TAG=null; blooms(van,.45,.02,.92,7,.14);
   const lp=grp('lighting',-3.6,1.2); TAG='lighting'; lp.add(cyl(.03,1.6,'#3a3530',0,0)); TAG=null; const lb=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,.24,8),lanternMat); lb.position.y=1.7; lb.userData.layer='lighting'; lp.add(lb); g.add(lp);
   TAG='structures'; const gen=box(2.2,1.4,1.1,'#5d6a5a',-82,0,-16); gen.userData.layer='structures'; scene.add(gen); TAG=null; gen.position.y=H(-82,-16)+.6;
 })();
@@ -1015,7 +1022,7 @@ function renderRentals(){
     ['Dinner',[['Trestle tables, 2.4 m',tables],['Dining chairs (wood crossback)',g],['Tablecloths for a '+Math.round(dl)+' m table',Math.ceil(dl/3)+' × 3 m'],['Napkins',g],['Greenery runner (florist)',Math.round(dl)+' m'],['Candle holders',Math.ceil(g/4)],['Service stations for plated service',2],['Festoon lights over the table',Math.round(dl+4)+' m, 2 poles']]],
     ['Party tent',[['Tent '+TW+' × '+TD+' m with sides',1],['Raised level floor',TW*TD+' m²'],['Dance floor',Math.round(Math.min(8,TW*.4))+' × '+Math.round(Math.min(8,TD*.5))+' m'],['Bar counter',1],['DJ booth with sound and lights','1 set'],['High tables with stretch covers',6],['Lounge sofas',4],['Round cake table with linen',1],['Gifts and cards table',1],['Photo corner backdrop with flowers',1],['Festoon lights inside',2*TW+' m']]],
     ['Paths & lighting',[['Matting or gravel for guest paths',Math.round(guestPath*1.6)+' m²'],['Service path surface',Math.round(servPath*2.4)+' m²'],['Lanterns on posts (paths and toilets)',lanternCount+1],['Uplights for the olives by dinner','≈ 8']]],
-    ['Back of house',[['Catering marquee 6 × 10 m',1],['Generator and cabling','1 set'],['Toilet cabins',3],['Accessible toilet cabin',1],['Hand-wash station',1],['Bins and recycling stations','≈ 6']]],
+    ['Back of house',[['Catering marquee 6 × 10 m',1],['Generator and cabling','1 set'],['Toilet cabins',3],['Accessible toilet cabin',1],['Hand-wash station',1],['Vanity table with linen, standing mirror and toiletries basket',1],['Bins and recycling stations','≈ 6']]],
     ['Totals to check',[['All chairs (ceremony, dinner, signing, musicians)',g*2+4],['All high tables',htDrinks+6],['All tables with linen (excl. dinner)',8]]]];
   const el=document.getElementById('rentals'); if(!el) return;
   el.innerHTML=groups.map(([t,items])=>`<div><h3>${t}</h3><ul>${items.map(([n,v])=>`<li><span>${n}</span><span class="${String(v).includes('not placed')?'todo':''}">${v}</span></li>`).join('')}</ul></div>`).join('');
